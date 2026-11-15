@@ -4,7 +4,7 @@
 
 Tu as deux heures devant toi, ou jusqu'à minuit ? Anime Clock te dit combien d'épisodes tu peux enchaîner, à quel épisode tu t'arrêtes et à quelle heure tu auras fini.
 
-<img src="assets/gia.svg" alt="GIA : généré par IA avec Claude" width="176">
+<img src="assets/gia.png" alt="Pictogramme GIA : contenu généré par IA" width="64">
 
 > **Projet de test et d'expérimentation.**
 > L'intelligence artificielle est utilisée ici uniquement pour tester et expérimenter le développement assisté par IA, sur ce projet seulement. Le code, les textes et la doc ont été écrits avec Claude (Anthropic), à partir des demandes de l'auteur.
@@ -65,7 +65,7 @@ anime-clock/
 ├── index.html                 Page unique du site
 ├── assets/
 │   ├── logo.svg               Logo et favicon
-│   └── gia.svg                Pictogramme GIA (généré par IA)
+│   └── gia.png                Pictogramme GIA (généré par IA)
 ├── css/
 │   ├── base.css               Couleurs, thèmes, en-tête, mise en page
 │   ├── form.css               Formulaire
@@ -124,7 +124,7 @@ Le format complet (versions, fillers, durées par saison) est décrit dans `CLAU
 
 ## Développé avec Claude
 
-<img src="assets/gia.svg" alt="GIA" width="132" align="right">
+<img src="assets/gia.png" alt="Pictogramme GIA" width="56" align="right">
 
 Ce projet a été construit avec **Claude** (Anthropic), via Claude Code, dans le cadre d'un test du développement assisté par IA :
 

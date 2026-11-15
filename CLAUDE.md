@@ -21,7 +21,7 @@ anime-clock/
 ├── index.html            Page unique : en-tête, formulaire, onglets Calcul / Détails, modal de l'affiche
 ├── assets/
 │   ├── logo.svg          Logo (horloge + traits de vitesse manga + éclat), sert aussi de favicon
-│   └── gia.svg           Pictogramme GIA (généré par IA · Claude), utilisé dans le README
+│   └── gia.png           Pictogramme GIA fourni par l'utilisateur (200 × 247 px), affiché à 64 px dans le README
 ├── css/
 │   ├── base.css          Couleurs et thèmes, bases, en-tête, menu paramètres, mise en page, pied de page
 │   ├── form.css          Formulaire : étapes, champs, recherche, mode de temps, bouton Calculer
@@ -180,7 +180,7 @@ Appliquer les règles **stop-slop** (https://github.com/hardikpandya/stop-slop),
 
 Le README doit toujours contenir :
 - l'arborescence en arbre ASCII, à jour ;
-- la mention de l'usage de Claude (Anthropic) avec le pictogramme `assets/gia.svg` ;
+- la mention de l'usage de Claude (Anthropic) avec le pictogramme `assets/gia.png` (affiché en petit : 64 px en haut, 56 px dans la section Claude) ;
 - l'avertissement : l'IA est utilisée à titre de test et d'expérimentation, sur ce projet seulement ;
 - la marche à suivre pour reprendre le projet avec Claude : lire `docs/REPRISE.md` puis `CLAUDE.md` ;
 - la licence MIT.
