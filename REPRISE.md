@@ -15,6 +15,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 7. Skills du projet `maj-docs` et `relecture-code` (`.claude/skills/`).
 8. Colonne de droite en onglets Calcul / Détails (sticky), synopsis traduit en français avec bascule vers l'original, affiche en grand dans un modal, menu paramètres avec choix du thème.
 9. Docker (nginx) et `README.md`.
+10. Relecture qualité de `app.js` (skill `relecture-code`) : noms clarifiés, constantes nommées en tête de fichier, un seul point d'appel AniList (`aniListQuery`), titres en double retirés de la fiche. Comportement inchangé, cas de référence vérifié.
 
 `git log --oneline` donne l'historique détaillé.
 

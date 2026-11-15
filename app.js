@@ -18,12 +18,21 @@ const els = {
 };
 
 const STORE_KEY = "anime-clock:v1";
+
+const SEARCH_MIN_CHARS = 3;         // recherche en ligne à partir de 3 caractères
+const SEARCH_DEBOUNCE_MS = 350;     // attente après la dernière frappe
+const SEARCH_TIMEOUT_MS = 8000;     // au-delà, la recherche en ligne est déclarée indisponible
+const SUGGESTION_LIMIT = 8;         // suggestions du catalogue affichées
+const REMOTE_DEFAULTS = { dur: 1440, credits: 90, eps: 12 }; // anime en ligne sans info : 24 min, 90 s, 12 ép.
+const NO_CREDITS_BELOW = 600;       // épisodes de moins de 10 min : pas de générique compté
+const UNTIL_REFRESH_MS = 30000;     // rafraîchissement du mode « heure de fin »
+const EPISODE_LIST = { max: 30, head: 15, tail: 5 }; // au-delà de max épisodes, on n'affiche que le début et la fin
 let anime = null;        // anime sélectionné (format du catalogue)
 let calculated = false;  // après un premier calcul, on recalcule à chaque changement
 
 /* ---------- Outils ---------- */
 
-const norm = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const norm = (s) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase(); // « Frièren » → « frieren »
 
 function parseRanges(str) {
   const set = new Set();
@@ -59,16 +68,17 @@ const currentSeasonIdx = () => Number(els.season.value) || 0;
 /* ---------- Recherche ---------- */
 
 let activeIndex = -1;
-let jikanCtrl = null;
-let jikanTimer = null;
-let jikanItems = [];
-let jikanFailed = false;
-let jikanDone = false;
+let suggestionItems = []; // { li, onPick } dans l'ordre affiché
+let remoteCtrl = null;
+let remoteTimer = null;
+let remoteItems = [];
+let remoteFailed = false;
+let remoteDone = false;
 
 function localMatches(q) {
   const n = norm(q.trim());
-  if (!n) return CATALOG.slice(0, 8);
-  return CATALOG.filter((a) => norm(a.title + " " + (a.alt || "")).includes(n)).slice(0, 8);
+  if (!n) return CATALOG.slice(0, SUGGESTION_LIMIT);
+  return CATALOG.filter((a) => norm(a.title + " " + (a.alt || "")).includes(n)).slice(0, SUGGESTION_LIMIT);
 }
 
 function renderSuggestions(q) {
@@ -104,8 +114,9 @@ function renderSuggestions(q) {
     }
   }
 
+  const longEnough = q.trim().length >= SEARCH_MIN_CHARS;
   const localIds = new Set(local.map((a) => norm(a.title)));
-  const remote = jikanItems.filter((j) => !localIds.has(norm(j.title)));
+  const remote = remoteItems.filter((j) => !localIds.has(norm(j.title)));
   if (remote.length) {
     addGroup(`En ligne (${remote[0].source})`);
     for (const j of remote) {
@@ -113,11 +124,11 @@ function renderSuggestions(q) {
       const meta = [j.type, j.year, eps].filter(Boolean).join(" · ");
       addItem(j.title, meta, () => pickAnime(fromRemote(j)));
     }
-  } else if (q.trim().length >= 3 && jikanCtrl) {
+  } else if (longEnough && remoteCtrl) {
     addGroup("En ligne : recherche…");
-  } else if (q.trim().length >= 3 && jikanFailed) {
+  } else if (longEnough && remoteFailed) {
     addGroup("Recherche en ligne indisponible");
-  } else if (q.trim().length >= 3 && jikanDone) {
+  } else if (longEnough && remoteDone) {
     addGroup("En ligne : aucun résultat");
   }
 
@@ -130,44 +141,44 @@ function renderSuggestions(q) {
   ul.hidden = ul.children.length === 0;
   els.search.setAttribute("aria-expanded", String(!ul.hidden));
   activeIndex = -1;
-  ul._items = items;
+  suggestionItems = items;
 }
 
-function searchJikan(q) {
-  clearTimeout(jikanTimer);
-  if (jikanCtrl) jikanCtrl.abort();
-  jikanCtrl = null;
-  jikanItems = [];
-  jikanDone = false;
-  jikanFailed = false;
-  if (q.trim().length < 3) return;
-  jikanTimer = setTimeout(async () => {
+function searchRemote(q) {
+  clearTimeout(remoteTimer);
+  if (remoteCtrl) remoteCtrl.abort();
+  remoteCtrl = null;
+  remoteItems = [];
+  remoteDone = false;
+  remoteFailed = false;
+  if (q.trim().length < SEARCH_MIN_CHARS) return;
+  remoteTimer = setTimeout(async () => {
     const ctrl = new AbortController();
-    jikanCtrl = ctrl;
-    jikanFailed = false;
-    jikanDone = false;
+    remoteCtrl = ctrl;
+    remoteFailed = false;
+    remoteDone = false;
     renderSuggestions(els.search.value);
     let timedOut = false;
-    const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, 8000);
+    const timer = setTimeout(() => { timedOut = true; ctrl.abort(); }, SEARCH_TIMEOUT_MS);
     try {
       try {
-        jikanItems = await searchAniList(q.trim(), ctrl.signal);
+        remoteItems = await searchAniList(q.trim(), ctrl.signal);
       } catch (e) {
         if (e.name === "AbortError") throw e;
-        jikanItems = await searchJikanApi(q.trim(), ctrl.signal); // secours
+        remoteItems = await searchJikanApi(q.trim(), ctrl.signal); // secours
       }
-      jikanDone = true;
+      remoteDone = true;
     } catch (e) {
       if (e.name === "AbortError" && !timedOut) return; // remplacée par une recherche plus récente
-      jikanItems = [];
-      jikanFailed = true;
+      remoteItems = [];
+      remoteFailed = true;
     } finally {
       clearTimeout(timer);
     }
-    if (jikanCtrl !== ctrl) return;
-    jikanCtrl = null;
+    if (remoteCtrl !== ctrl) return;
+    remoteCtrl = null;
     if (document.activeElement === els.search) renderSuggestions(els.search.value);
-  }, 350);
+  }, SEARCH_DEBOUNCE_MS);
 }
 
 function parseJikanDuration(str) {
@@ -176,20 +187,28 @@ function parseJikanDuration(str) {
   return (h ? +h[1] * 3600 : 0) + (m ? +m[1] * 60 : 0) + (s ? +s[1] : 0);
 }
 
-// Source principale : AniList (GraphQL, accepte les appels depuis le navigateur).
+const ANILIST_URL = "https://graphql.anilist.co";
+
+// AniList : API GraphQL qui accepte les appels depuis le navigateur. Renvoie json.data, ou null sur 404.
+async function aniListQuery(query, variables, signal) {
+  const res = await fetch(ANILIST_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query, variables }),
+    signal
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(res.status);
+  return (await res.json()).data;
+}
+
+// Source principale de la recherche en ligne.
 async function searchAniList(q, signal) {
   const query = `query($s:String){Page(perPage:6){media(search:$s,type:ANIME,sort:SEARCH_MATCH,isAdult:false){
     id title{romaji english} format episodes duration seasonYear status nextAiringEpisode{episode}}}}`;
-  const res = await fetch("https://graphql.anilist.co", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query, variables: { s: q } }),
-    signal
-  });
-  if (!res.ok) throw new Error(res.status);
-  const json = await res.json();
+  const data = await aniListQuery(query, { s: q }, signal);
   const formats = { TV: "TV", TV_SHORT: "TV court", MOVIE: "Film", OVA: "OVA", ONA: "ONA", SPECIAL: "Spécial" };
-  return ((json.data && json.data.Page.media) || []).map((m) => ({
+  return ((data && data.Page.media) || []).map((m) => ({
     source: "AniList",
     id: "al-" + m.id,
     title: m.title.english || m.title.romaji,
@@ -220,9 +239,9 @@ async function searchJikanApi(q, signal) {
 }
 
 function fromRemote(j) {
-  const dur = j.durationSec || 1440;
-  const credits = dur >= 600 ? 90 : 0;
-  const eps = j.episodes || j.released || 12;
+  const dur = j.durationSec || REMOTE_DEFAULTS.dur;
+  const credits = dur >= NO_CREDITS_BELOW ? REMOTE_DEFAULTS.credits : 0;
+  const eps = j.episodes || j.released || REMOTE_DEFAULTS.eps;
   return {
     id: j.id,
     title: j.title,
@@ -241,12 +260,12 @@ function manualAnime(title) {
     title,
     api: true,
     manual: true,
-    versions: [{ id: "tv", label: "Série", ...STD, seasons: [{ name: title, first: 1, eps: 12 }] }]
+    versions: [{ id: "tv", label: "Série", ...STD, seasons: [{ name: title, first: 1, eps: REMOTE_DEFAULTS.eps }] }]
   };
 }
 
 function moveActive(delta) {
-  const items = els.suggestions._items || [];
+  const items = suggestionItems;
   if (!items.length) return;
   activeIndex = (activeIndex + delta + items.length) % items.length;
   items.forEach((it, i) => it.li.setAttribute("aria-selected", String(i === activeIndex)));
@@ -255,7 +274,7 @@ function moveActive(delta) {
 
 els.search.addEventListener("input", () => {
   renderSuggestions(els.search.value);
-  searchJikan(els.search.value);
+  searchRemote(els.search.value);
 });
 els.search.addEventListener("focus", () => { els.search.select(); renderSuggestions(""); });
 els.search.addEventListener("blur", () => {
@@ -267,7 +286,7 @@ els.search.addEventListener("keydown", (e) => {
   if (e.key === "ArrowDown") { e.preventDefault(); moveActive(1); }
   else if (e.key === "ArrowUp") { e.preventDefault(); moveActive(-1); }
   else if (e.key === "Enter") {
-    const items = els.suggestions._items || [];
+    const items = suggestionItems;
     if (!els.suggestions.hidden && items.length) {
       e.preventDefault();
       items[Math.max(activeIndex, 0)].onPick();
@@ -389,7 +408,7 @@ function refreshUntilHint() {
   const label = midnight ? " avant la fin de la journée" : "";
   els.untilHint.textContent = `Il te reste ${fmtDur((t - now) / 1000)}${label}${tomorrow}.`;
 }
-setInterval(() => { refreshUntilHint(); if (calculated && mode() === "until") calculate(); }, 30000);
+setInterval(() => { refreshUntilHint(); if (calculated && mode() === "until") calculate(); }, UNTIL_REFRESH_MS);
 
 for (const r of els.form.elements.mode) {
   r.addEventListener("change", () => {
@@ -454,7 +473,7 @@ function* episodes({ stayInSeason }) {
   }
 }
 
-function settings() {
+function sessionOptions() {
   return {
     skipOp: els.skipOp.checked,
     skipEd: els.skipEd.checked,
@@ -465,8 +484,8 @@ function settings() {
   };
 }
 
-// Durée réelle du i-ème épisode de la session.
-function cost(ep, i, cfg) {
+// Durée réelle du i-ème épisode de la session (i = 0 pour le premier).
+function episodeCost(ep, i, cfg) {
   const watchOp = !cfg.skipOp || i < cfg.opKeep;
   const watchEd = !cfg.skipEd || i < cfg.edKeep;
   const op = Math.min(ep.op, ep.dur), ed = Math.min(ep.ed, ep.dur - op);
@@ -496,18 +515,18 @@ function calculate() {
   els.formError.textContent = err;
   if (err) return false;
 
-  const cfg = settings();
+  const cfg = sessionOptions();
   const now = new Date();
-  const T = availableSeconds(now);
+  const available = availableSeconds(now);
   const stay = els.staySeason.checked;
 
   const watched = [];
   let used = 0, saved = 0, next = null, nextPause = 0;
   let i = 0;
   for (const ep of episodes({ stayInSeason: stay })) {
-    const c = cost(ep, i, cfg);
+    const c = episodeCost(ep, i, cfg);
     const p = i > 0 ? cfg.pause : 0;
-    if (used + p + c.total > T) { next = { ep, c }; nextPause = p; break; }
+    if (used + p + c.total > available) { next = { ep, c }; nextPause = p; break; }
     used += p;
     watched.push({ ep, c, start: used });
     used += c.total;
@@ -519,24 +538,24 @@ function calculate() {
   const startSeason = currentSeasonIdx();
   let seasonLeft = 0, seriesLeft = 0, seasonEps = 0, seriesEps = 0, k = 0;
   for (const ep of episodes({ stayInSeason: false })) {
-    const t = cost(ep, k, cfg).total + (k > 0 ? cfg.pause : 0);
+    const t = episodeCost(ep, k, cfg).total + (k > 0 ? cfg.pause : 0);
     seriesLeft += t; seriesEps++;
     if (ep.seasonIdx === startSeason) { seasonLeft += t; seasonEps++; }
     k++;
   }
 
-  render({ watched, used, saved, next, nextPause, T, now, seasonLeft, seriesLeft, seasonEps, seriesEps, stay });
+  renderResult({ watched, used, saved, next, nextPause, available, now, seasonLeft, seriesLeft, seasonEps, seriesEps, stay });
   save();
   return true;
 }
 
 /* ---------- Affichage ---------- */
 
-function render(r) {
-  const { watched, used, saved, next, nextPause, T, now } = r;
+function renderResult(r) {
+  const { watched, used, saved, next, nextPause, available, now } = r;
   const n = watched.length;
   const v = currentVersion();
-  const leftover = T - used;
+  const leftover = available - used;
   const end = new Date(now.getTime() + used * 1000);
   const multiSeason = new Set(watched.map((w) => w.ep.seasonIdx)).size > 1;
 
@@ -563,7 +582,7 @@ function render(r) {
   // Frise
   let bar = "";
   for (const w of watched) {
-    const pct = (w.c.total / T) * 100;
+    const pct = (w.c.total / available) * 100;
     const s = w.c.shown, tot = s.op + s.ed + s.core;
     bar += `<div class="ep" style="width:${pct}%" title="Épisode ${w.ep.n} · ${fmtDur(w.c.total)}">` +
       (s.op ? `<div class="opp" style="width:${(s.op / tot) * 100}%"></div>` : "") +
@@ -572,7 +591,7 @@ function render(r) {
       `</div>`;
   }
   if (next && leftover > 0) {
-    bar += `<div class="partial" style="width:${(leftover / T) * 100}%" title="Marge"></div>`;
+    bar += `<div class="partial" style="width:${(leftover / available) * 100}%" title="Marge"></div>`;
   }
 
   // Liste des épisodes
@@ -583,10 +602,10 @@ function render(r) {
     return `<li><span>Épisode ${w.ep.n}${tag}</span><time>${fmtClock(t)} · ${fmtDur(w.c.total)}</time></li>`;
   };
   let list = "";
-  if (n > 30) {
-    list = watched.slice(0, 15).map(row).join("") +
-      `<li class="gap">… ${n - 20} épisodes …</li>` +
-      watched.slice(-5).map(row).join("");
+  if (n > EPISODE_LIST.max) {
+    list = watched.slice(0, EPISODE_LIST.head).map(row).join("") +
+      `<li class="gap">… ${n - EPISODE_LIST.head - EPISODE_LIST.tail} épisodes …</li>` +
+      watched.slice(-EPISODE_LIST.tail).map(row).join("");
   } else {
     list = watched.map(row).join("");
   }
@@ -600,7 +619,7 @@ function render(r) {
   if (!next && n) {
     notes.push(`<span class="done">Tu arrives au bout ${r.stay ? "de la saison" : "de la série"}.</span>`);
   } else if (n) {
-    const sessions = (left) => Math.ceil(left / Math.max(T, 1));
+    const sessions = (left) => Math.ceil(left / Math.max(available, 1));
     if (r.seasonLeft > used && v.seasons.length > 1) {
       notes.push(`Pour finir la saison : ${fmtDur(r.seasonLeft)} (${r.seasonEps} ép.), soit ${sessions(r.seasonLeft)} sessions comme celle-ci.`);
     }
@@ -673,15 +692,8 @@ async function fetchAniListDetails(a) {
     studios(isMain:true){nodes{name}}}}`;
   const v = currentVersion();
   const variables = byId ? { id: Number(a.id.slice(3)) } : { s: v.search || a.search || a.title };
-  const res = await fetch("https://graphql.anilist.co", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query, variables })
-  });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(res.status);
-  const json = await res.json();
-  return (json.data && json.data.Media) || null;
+  const data = await aniListQuery(query, variables);
+  return (data && data.Media) || null;
 }
 
 function cleanDescription(text) {
@@ -695,7 +707,7 @@ function renderDetails(remote, state = "") {
   if (!anime) return;
   shownDetails = remote;
   const v = currentVersion();
-  const cfg = settings();
+  const cfg = sessionOptions();
   const total = v.seasons.reduce((sum, s) => sum + s.eps, 0);
   const fillers = parseRanges(v.fillers);
   const epTime = (s) => (s.dur ?? v.dur);
@@ -707,7 +719,11 @@ function renderDetails(remote, state = "") {
 
   const r = remote || {};
   const title = anime.title;
-  const orig = [r.title && r.title.native, r.title && r.title.romaji !== title ? r.title.romaji : null].filter(Boolean).join(" · ");
+  // Titres natif et romaji, sans répéter le titre affiché (One Piece = ONE PIECE).
+  const seen = new Set([norm(title)]);
+  const orig = [r.title && r.title.native, r.title && r.title.romaji]
+    .filter((t) => t && !seen.has(norm(t)) && seen.add(norm(t)))
+    .join(" · ");
   const year = r.startDate && r.startDate.year ? String(r.startDate.year) : "";
   const studio = r.studios && r.studios.nodes.length ? r.studios.nodes.map((s) => s.name).join(", ") : "";
 
