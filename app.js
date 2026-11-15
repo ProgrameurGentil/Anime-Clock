@@ -10,7 +10,8 @@ const els = {
   durationBox: $("durationBox"), untilBox: $("untilBox"),
   skipOp: $("skipOp"), skipEd: $("skipEd"), opKeep: $("opKeep"), edKeep: $("edKeep"),
   opDur: $("opDur"), edDur: $("edDur"), speed: $("speed"), pause: $("pause"),
-  result: $("result"), formError: $("formError"), animeAdvanced: $("animeAdvanced")
+  result: $("result"), formError: $("formError"), animeAdvanced: $("animeAdvanced"),
+  details: $("details"), detailsBody: $("detailsBody")
 };
 
 const STORE_KEY = "anime-clock:v1";
@@ -292,6 +293,7 @@ function pickAnime(a, restore = {}) {
   els.season.disabled = false;
   els.episode.disabled = false;
   if (a.versions.length > 1 || a.manual || a.unknownCount) els.animeAdvanced.open = true;
+  els.details.open = false;
   onChange();
 }
 
@@ -620,10 +622,125 @@ function render(r) {
   els.result.hidden = false;
 }
 
+/* ---------- Détails de l'anime ---------- */
+
+const detailsCache = new Map(); // clé : id de l'anime, valeur : données AniList (ou null si introuvable)
+
+const STATUS_FR = {
+  FINISHED: "Terminé", RELEASING: "En cours", NOT_YET_RELEASED: "À venir",
+  CANCELLED: "Annulé", HIATUS: "En pause"
+};
+
+async function fetchAniListDetails(a) {
+  const byId = a.id.startsWith("al-");
+  const query = `query($id:Int,$s:String){Media(id:$id,search:$s,type:ANIME){
+    id siteUrl title{romaji english native} coverImage{large} description(asHtml:false)
+    genres averageScore status format episodes duration startDate{year} endDate{year}
+    studios(isMain:true){nodes{name}}}}`;
+  const v = currentVersion();
+  const variables = byId ? { id: Number(a.id.slice(3)) } : { s: v.search || a.search || a.title };
+  const res = await fetch("https://graphql.anilist.co", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ query, variables })
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(res.status);
+  const json = await res.json();
+  return (json.data && json.data.Media) || null;
+}
+
+function cleanDescription(text) {
+  if (!text) return "";
+  const div = document.createElement("div");
+  div.innerHTML = text.replace(/<br\s*\/?>/gi, "\n");
+  return div.textContent.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function renderDetails(remote, state = "") {
+  if (!anime) return;
+  const v = currentVersion();
+  const cfg = settings();
+  const total = v.seasons.reduce((s, x) => s + x.eps, 0);
+  const fillers = parseRanges(v.fillers);
+  const epTime = (s) => (s.dur ?? v.dur);
+  const fullTime = v.seasons.reduce((sum, s) => sum + s.eps * epTime(s), 0);
+  const skipped = v.seasons.reduce((sum, s) => {
+    const cut = (cfg.skipOp ? (s.op ?? v.op) : 0) + (cfg.skipEd ? (s.ed ?? v.ed) : 0);
+    return sum + s.eps * (epTime(s) - cut);
+  }, 0);
+
+  const r = remote || {};
+  const title = anime.title;
+  const orig = [r.title && r.title.native, r.title && r.title.romaji !== title ? r.title.romaji : null].filter(Boolean).join(" · ");
+  const years = r.startDate && r.startDate.year ? String(r.startDate.year) : "";
+  const studio = r.studios && r.studios.nodes.length ? r.studios.nodes.map((s) => s.name).join(", ") : "";
+
+  const facts = [
+    ["fa-film", "Épisodes", anime.unknownCount ? `${total} sortis` : String(total)],
+    ["fa-clock", "Tout voir", fmtDur(fullTime)],
+    ["fa-forward", "Sans génériques", fmtDur(skipped)]
+  ];
+  if (fillers.size) facts.push(["fa-filter", "Fillers", `${fillers.size} ép.`]);
+  if (anime.versions.length > 1) facts.push(["fa-code-branch", "Versions", anime.versions.map((x) => x.label).join(", ")]);
+  if (r.status) facts.push(["fa-signal", "Statut", STATUS_FR[r.status] || r.status]);
+  if (years) facts.push(["fa-calendar", "Première diffusion", years]);
+  if (studio) facts.push(["fa-building", "Studio", studio]);
+  if (r.averageScore) facts.push(["fa-star", "Note AniList", `${r.averageScore} / 100`]);
+
+  const seasonsRows = v.seasons.map((s) => {
+    const last = s.first + s.eps - 1;
+    return `<tr><td>${escapeHtml(s.name)}</td><td>${s.eps > 1 ? `${s.first}–${last}` : s.first}</td><td>${fmtDur(s.eps * epTime(s))}</td></tr>`;
+  }).join("");
+
+  const synopsis = cleanDescription(r.description);
+  els.detailsBody.innerHTML = `
+    <div class="details-head">
+      ${r.coverImage ? `<img src="${escapeHtml(r.coverImage.large)}" alt="Affiche de ${escapeHtml(title)}" loading="lazy">` : ""}
+      <div>
+        <h3>${escapeHtml(title)}</h3>
+        ${orig ? `<p class="orig">${escapeHtml(orig)}</p>` : ""}
+        ${r.genres && r.genres.length ? `<ul class="tags">${r.genres.map((g) => `<li>${escapeHtml(g)}</li>`).join("")}</ul>` : ""}
+      </div>
+    </div>
+    <dl class="facts">${facts.map(([ic, k, val]) => `<div><dt><i class="fa-solid ${ic}" aria-hidden="true"></i>${k}</dt><dd>${escapeHtml(val)}</dd></div>`).join("")}</dl>
+    ${synopsis ? `<p class="synopsis">${escapeHtml(synopsis)}</p>` : ""}
+    ${v.seasons.length > 1 ? `<table class="seasons"><thead><tr><th>Saison / arc</th><th>Épisodes</th><th>Durée</th></tr></thead><tbody>${seasonsRows}</tbody></table>` : ""}
+    <p class="src">${state || (r.siteUrl ? `Affiche, synopsis (en anglais) et note : <a href="${escapeHtml(r.siteUrl)}" target="_blank" rel="noopener">fiche AniList</a>.` : "")}</p>
+  `;
+}
+
+const detailsKey = () => `${anime.id}:${currentVersion().id}`;
+
+async function loadDetails() {
+  if (!anime || anime.manual) { renderDetails(null); return; }
+  const a = anime;
+  const key = detailsKey();
+  if (detailsCache.has(key)) { renderDetails(detailsCache.get(key)); return; }
+  renderDetails(null, "Chargement des infos AniList…");
+  try {
+    const data = await fetchAniListDetails(a);
+    detailsCache.set(key, data);
+    if (anime === a && detailsKey() === key) renderDetails(data, data ? "" : "Pas de fiche AniList trouvée.");
+  } catch (e) {
+    if (anime === a) renderDetails(null, "AniList ne répond pas, seules les infos locales sont affichées.");
+  }
+}
+
+function refreshDetails() {
+  if (!anime) { els.details.hidden = true; return; }
+  els.details.hidden = false;
+  if (els.details.open) loadDetails();
+  else renderDetails(detailsCache.get(detailsKey()) || null);
+}
+
+els.details.addEventListener("toggle", () => { if (els.details.open) loadDetails(); });
+
 /* ---------- Événements ---------- */
 
 function onChange() {
   updateInfo();
+  refreshDetails();
   if (calculated) calculate();
   else save();
 }

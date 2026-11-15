@@ -67,7 +67,7 @@ const CATALOG = [
         ]
       },
       {
-        id: "kai", label: "Dragon Ball Z Kai", ...STD,
+        id: "kai", search: "Dragon Ball Kai", label: "Dragon Ball Z Kai", ...STD,
         seasons: [
           { name: "Kai (Saiyans à Cell)", first: 1, eps: 98 },
           { name: "The Final Chapters (Boo)", first: 99, eps: 69 }
@@ -99,8 +99,8 @@ const CATALOG = [
     id: "hxh",
     title: "Hunter x Hunter",
     versions: [
-      { id: "2011", label: "Version 2011", ...STD, seasons: [{ name: "Hunter x Hunter (2011)", first: 1, eps: 148 }] },
-      { id: "1999", label: "Version 1999", ...STD, seasons: [{ name: "Hunter x Hunter (1999)", first: 1, eps: 62 }] }
+      { id: "2011", search: "Hunter x Hunter (2011)", label: "Version 2011", ...STD, seasons: [{ name: "Hunter x Hunter (2011)", first: 1, eps: 148 }] },
+      { id: "1999", search: "Hunter x Hunter", label: "Version 1999", ...STD, seasons: [{ name: "Hunter x Hunter (1999)", first: 1, eps: 62 }] }
     ]
   },
   {
@@ -108,12 +108,13 @@ const CATALOG = [
     title: "Fullmetal Alchemist",
     alt: "brotherhood",
     versions: [
-      { id: "fmab", label: "Brotherhood (2009)", ...STD, seasons: [{ name: "Brotherhood", first: 1, eps: 64 }] },
-      { id: "fma", label: "Version 2003", ...STD, seasons: [{ name: "FMA (2003)", first: 1, eps: 51 }] }
+      { id: "fmab", search: "Fullmetal Alchemist: Brotherhood", label: "Brotherhood (2009)", ...STD, seasons: [{ name: "Brotherhood", first: 1, eps: 64 }] },
+      { id: "fma", search: "Hagane no Renkinjutsushi", label: "Version 2003", ...STD, seasons: [{ name: "FMA (2003)", first: 1, eps: 51 }] }
     ]
   },
   {
     id: "aot",
+    search: "Shingeki no Kyojin",
     title: "L'Attaque des Titans",
     alt: "attack on titan shingeki no kyojin snk",
     versions: [{
@@ -131,6 +132,7 @@ const CATALOG = [
   },
   {
     id: "demon-slayer",
+    search: "Kimetsu no Yaiba",
     title: "Demon Slayer",
     alt: "kimetsu no yaiba",
     versions: [{
@@ -157,6 +159,7 @@ const CATALOG = [
   },
   {
     id: "mha",
+    search: "Boku no Hero Academia",
     title: "My Hero Academia",
     alt: "boku no hero academia",
     versions: [{
@@ -179,6 +182,7 @@ const CATALOG = [
   },
   {
     id: "code-geass",
+    search: "Code Geass: Hangyaku no Lelouch",
     title: "Code Geass",
     versions: [{
       id: "tv", label: "Série TV", ...STD,
@@ -218,6 +222,7 @@ const CATALOG = [
   },
   {
     id: "fire-force",
+    search: "Enen no Shouboutai",
     title: "Fire Force",
     alt: "enen no shouboutai",
     versions: [{
@@ -264,6 +269,7 @@ const CATALOG = [
   },
   {
     id: "opm",
+    search: "One Punch Man",
     title: "One Punch Man",
     versions: [{
       id: "tv", label: "Série TV", ...STD,
@@ -316,6 +322,7 @@ const CATALOG = [
   },
   {
     id: "frieren",
+    search: "Sousou no Frieren",
     title: "Frieren",
     alt: "sousou no frieren",
     versions: [{ id: "tv", label: "Série TV", ...STD, seasons: [{ name: "Saison 1", first: 1, eps: 28 }] }]
