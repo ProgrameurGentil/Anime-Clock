@@ -11,10 +11,32 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Applique le thème choisi avant l'affichage, pour éviter un flash de l'autre thème.
+    try {
+      const t = localStorage.getItem("anime-clock:theme");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) { /* stockage indisponible : thème du système */ }
+  </script>
 </head>
 <body>
   <header class="top">
-    <h1><img class="logo" src="logo.svg" alt="" width="44" height="44"> Anime Clock</h1>
+    <div class="top-row">
+      <h1><img class="logo" src="logo.svg" alt="" width="44" height="44"> Anime Clock</h1>
+      <div class="settings">
+        <button type="button" id="settingsBtn" class="icon-btn" aria-label="Paramètres" aria-haspopup="true" aria-expanded="false" aria-controls="settingsMenu">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        </button>
+        <div id="settingsMenu" class="settings-menu" hidden>
+          <p class="menu-title">Thème</p>
+          <div class="theme-choice" role="radiogroup" aria-label="Thème">
+            <label><input type="radio" name="theme" value="auto"> <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> Auto</label>
+            <label><input type="radio" name="theme" value="light"> <i class="fa-regular fa-sun" aria-hidden="true"></i> Clair</label>
+            <label><input type="radio" name="theme" value="dark"> <i class="fa-regular fa-moon" aria-hidden="true"></i> Sombre</label>
+          </div>
+        </div>
+      </div>
+    </div>
     <p class="tagline">Dis-moi combien de temps tu as, je te dis combien d'épisodes tu peux enchaîner.</p>
   </header>
 
@@ -164,14 +186,32 @@
       <p id="formError" class="error" role="alert"></p>
     </form>
 
-    <div class="side">
-      <details id="details" class="card details" hidden>
-        <summary><i class="fa-solid fa-circle-info"></i> Détails de l'anime <i class="fa-solid fa-chevron-down chev" aria-hidden="true"></i></summary>
-        <div id="detailsBody" class="details-body"></div>
-      </details>
-      <section id="result" class="card result" aria-live="polite" hidden></section>
+    <div class="side card">
+      <div class="tabs" role="tablist" aria-label="Résultat et fiche de l'anime">
+        <button type="button" role="tab" id="tabCalc" aria-controls="panelCalc" aria-selected="true">
+          <i class="fa-solid fa-calculator" aria-hidden="true"></i> Calcul
+        </button>
+        <button type="button" role="tab" id="tabDetails" aria-controls="panelDetails" aria-selected="false" tabindex="-1">
+          <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Détails de l'anime
+        </button>
+      </div>
+      <section id="panelCalc" class="panel" role="tabpanel" aria-labelledby="tabCalc" tabindex="0">
+        <div id="result" class="result" aria-live="polite">
+          <p class="empty"><i class="fa-regular fa-hourglass-half" aria-hidden="true"></i> Choisis un anime et ton temps, puis lance le calcul.</p>
+        </div>
+      </section>
+      <section id="panelDetails" class="panel" role="tabpanel" aria-labelledby="tabDetails" tabindex="0" hidden>
+        <div id="detailsBody" class="details-body">
+          <p class="empty"><i class="fa-solid fa-tv" aria-hidden="true"></i> Choisis un anime pour voir sa fiche.</p>
+        </div>
+      </section>
     </div>
   </main>
+
+  <dialog id="coverModal" class="modal" aria-label="Affiche en grand">
+    <button type="button" class="modal-close" id="coverClose" aria-label="Fermer"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    <img id="coverBig" alt="">
+  </dialog>
 
   <footer class="foot">
     <p>Durées moyennes, à quelques secondes près. Les listes de fillers viennent des listes tenues par les fans. Recherche hors catalogue via <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, avec <a href="https://jikan.moe" target="_blank" rel="noopener">Jikan</a> (MyAnimeList) en secours.</p>

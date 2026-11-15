@@ -12,12 +12,13 @@ Interface et textes en français.
   - Google Fonts : Space Grotesk (texte), JetBrains Mono (chiffres).
   - Font Awesome **6.5.2 Free, pack Classic** via cdnjs. Uniquement les styles gratuits `fa-solid` et `fa-regular`. Pas d'icônes Pro, pas d'emoji ni de caractères Unicode à la place d'une icône.
   - API AniList (`https://graphql.anilist.co`) et API Jikan (`https://api.jikan.moe/v4`).
+  - Traduction des synopsis : service public Google `translate.googleapis.com/translate_a/single?client=gtx` (gratuit, sans clé, CORS ouvert, non officiel donc sans garantie). MyMemory a été testé et écarté (traductions fausses).
 
 ## Fichiers
 
 | Fichier | Rôle |
 |---|---|
-| `index.html` | Structure de la page : formulaire à gauche, colonne droite (détails + résultat). |
+| `index.html` | Structure de la page : en-tête avec menu paramètres, formulaire à gauche, colonne droite à onglets (Calcul / Détails), modal de l'affiche. |
 | `styles.css` | Thème clair et sombre (tokens CSS sur `:root`, bascule via `prefers-color-scheme`), mise en page responsive. |
 | `app.js` | Recherche, sélection, calcul, rendu du résultat, panneau détails, mémoire locale. |
 | `data.js` | Catalogue `CATALOG` écrit à la main. |
@@ -62,13 +63,29 @@ Interface et textes en français.
 - Notes : pourcentage du prochain épisode visible avec la marge, temps pour finir la saison et la série en « sessions comme celle-ci », fin de série atteinte.
 - Après un premier calcul, le résultat se recalcule à chaque modification.
 
+### Colonne de droite : onglets
+- Deux onglets exclusifs : **Calcul** (ouvert par défaut) et **Détails de l'anime**. Ouvrir l'un ferme l'autre.
+- Motif ARIA des onglets : `role="tablist"/"tab"/"tabpanel"`, `aria-selected`, flèches gauche / droite au clavier.
+- Bureau (≥ 900 px) : la colonne est `position: sticky` (top 20 px, hauteur max = écran − 40 px) et le contenu de l'onglet défile à l'intérieur. Mobile : colonne sous le formulaire, sans sticky.
+- Un calcul réussi ramène sur l'onglet Calcul (et fait défiler jusqu'à lui en mobile).
+- Avant un anime choisi ou un calcul, chaque onglet affiche un message d'attente (`.empty`).
+
 ### Détails de l'anime
-- Panneau `<details>` **replié par défaut**, placé au-dessus du résultat dans la colonne de droite. Il se replie à chaque nouvel anime.
 - Infos locales immédiates : nombre d'épisodes, durée totale avec et sans génériques, fillers, versions, tableau des saisons.
-- À l'ouverture : requête AniList (par id pour un résultat AniList, sinon par `version.search || anime.search || anime.title`). Affiche, titres natif / romaji, genres, statut, première diffusion, studio, note, synopsis (en anglais). Cache par `anime.id:version.id`.
+- À l'ouverture de l'onglet : requête AniList (par id pour un résultat AniList, sinon par `version.search || anime.search || anime.title`). Affiche, titres natif / romaji, genres, statut, première diffusion, studio, note, synopsis. Cache par `anime.id:version.id`.
+- **Affiche** : clic → `<dialog>` modal avec l'image en grand (`coverImage.extraLarge`). Fermeture par la croix, Échap, ou un clic sur l'image ou le fond.
+- **Synopsis** : bascule « Français / Original ». Français par défaut, traduit automatiquement (découpe en morceaux de 1500 caractères max). Pendant la traduction ou en cas d'échec, le texte original s'affiche avec une note. Traductions gardées en mémoire et dans `localStorage`.
+
+### Paramètres
+- Bouton engrenage en haut à droite, ouvre un petit menu déroulant. Fermeture par un clic ailleurs ou Échap.
+- Pour l'instant : **thème** Auto (suit le système) / Clair / Sombre, via `data-theme` sur `<html>`. Un script dans `<head>` applique le thème enregistré avant l'affichage (pas de flash).
 
 ### Mémoire locale
-- `localStorage` clé `anime-clock:v1`, toujours dans un `try/catch`. Garde l'anime (id du catalogue ou objet complet pour un anime en ligne), la version, la saison, l'épisode et tous les réglages.
+Toujours dans un `try/catch`, le site marche sans.
+- `anime-clock:v1` : l'anime (id du catalogue ou objet complet pour un anime en ligne), la version, la saison, l'épisode et tous les réglages du formulaire.
+- `anime-clock:theme` : `auto`, `light` ou `dark`.
+- `anime-clock:synopsis-lang` : `fr` ou `original`.
+- `anime-clock:fr:<id AniList>` : synopsis traduit.
 
 ## Modèle de données (`data.js`)
 

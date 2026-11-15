@@ -11,7 +11,10 @@ const els = {
   skipOp: $("skipOp"), skipEd: $("skipEd"), opKeep: $("opKeep"), edKeep: $("edKeep"),
   opDur: $("opDur"), edDur: $("edDur"), speed: $("speed"), pause: $("pause"),
   result: $("result"), formError: $("formError"), animeAdvanced: $("animeAdvanced"),
-  details: $("details"), detailsBody: $("detailsBody")
+  detailsBody: $("detailsBody"),
+  tabCalc: $("tabCalc"), tabDetails: $("tabDetails"), panelCalc: $("panelCalc"), panelDetails: $("panelDetails"),
+  coverModal: $("coverModal"), coverBig: $("coverBig"), coverClose: $("coverClose"),
+  settingsBtn: $("settingsBtn"), settingsMenu: $("settingsMenu")
 };
 
 const STORE_KEY = "anime-clock:v1";
@@ -293,7 +296,6 @@ function pickAnime(a, restore = {}) {
   els.season.disabled = false;
   els.episode.disabled = false;
   if (a.versions.length > 1 || a.manual || a.unknownCount) els.animeAdvanced.open = true;
-  els.details.open = false;
   onChange();
 }
 
@@ -619,12 +621,44 @@ function render(r) {
     <ul class="eplist">${list}</ul>` : ""}
     ${notes.map((t) => `<p class="note">${t}</p>`).join("")}
   `;
-  els.result.hidden = false;
+}
+
+/* ---------- Onglets Calcul / Détails ---------- */
+
+const tabs = [
+  { tab: els.tabCalc, panel: els.panelCalc },
+  { tab: els.tabDetails, panel: els.panelDetails }
+];
+
+function selectTab(target, { focus = false } = {}) {
+  for (const { tab, panel } of tabs) {
+    const active = tab === target;
+    tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
+    panel.hidden = !active;
+  }
+  if (focus) target.focus();
+  if (target === els.tabDetails) loadDetails();
+}
+
+const detailsTabOpen = () => els.tabDetails.getAttribute("aria-selected") === "true";
+
+for (const { tab } of tabs) {
+  tab.addEventListener("click", () => selectTab(tab));
+  // Flèches gauche / droite pour passer d'un onglet à l'autre (motif ARIA des onglets).
+  tab.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const i = tabs.findIndex((t) => t.tab === tab);
+    const next = tabs[(i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
+    selectTab(next.tab, { focus: true });
+  });
 }
 
 /* ---------- Détails de l'anime ---------- */
 
-const detailsCache = new Map(); // clé : id de l'anime, valeur : données AniList (ou null si introuvable)
+const detailsCache = new Map(); // clé : `${anime.id}:${version.id}`, valeur : fiche AniList ou null
+let shownDetails = null;         // fiche AniList affichée en ce moment
 
 const STATUS_FR = {
   FINISHED: "Terminé", RELEASING: "En cours", NOT_YET_RELEASED: "À venir",
@@ -634,7 +668,7 @@ const STATUS_FR = {
 async function fetchAniListDetails(a) {
   const byId = a.id.startsWith("al-");
   const query = `query($id:Int,$s:String){Media(id:$id,search:$s,type:ANIME){
-    id siteUrl title{romaji english native} coverImage{large} description(asHtml:false)
+    id siteUrl title{romaji english native} coverImage{large extraLarge} description(asHtml:false)
     genres averageScore status format episodes duration startDate{year} endDate{year}
     studios(isMain:true){nodes{name}}}}`;
   const v = currentVersion();
@@ -659,13 +693,14 @@ function cleanDescription(text) {
 
 function renderDetails(remote, state = "") {
   if (!anime) return;
+  shownDetails = remote;
   const v = currentVersion();
   const cfg = settings();
-  const total = v.seasons.reduce((s, x) => s + x.eps, 0);
+  const total = v.seasons.reduce((sum, s) => sum + s.eps, 0);
   const fillers = parseRanges(v.fillers);
   const epTime = (s) => (s.dur ?? v.dur);
   const fullTime = v.seasons.reduce((sum, s) => sum + s.eps * epTime(s), 0);
-  const skipped = v.seasons.reduce((sum, s) => {
+  const withoutCredits = v.seasons.reduce((sum, s) => {
     const cut = (cfg.skipOp ? (s.op ?? v.op) : 0) + (cfg.skipEd ? (s.ed ?? v.ed) : 0);
     return sum + s.eps * (epTime(s) - cut);
   }, 0);
@@ -673,18 +708,18 @@ function renderDetails(remote, state = "") {
   const r = remote || {};
   const title = anime.title;
   const orig = [r.title && r.title.native, r.title && r.title.romaji !== title ? r.title.romaji : null].filter(Boolean).join(" · ");
-  const years = r.startDate && r.startDate.year ? String(r.startDate.year) : "";
+  const year = r.startDate && r.startDate.year ? String(r.startDate.year) : "";
   const studio = r.studios && r.studios.nodes.length ? r.studios.nodes.map((s) => s.name).join(", ") : "";
 
   const facts = [
     ["fa-film", "Épisodes", anime.unknownCount ? `${total} sortis` : String(total)],
     ["fa-clock", "Tout voir", fmtDur(fullTime)],
-    ["fa-forward", "Sans génériques", fmtDur(skipped)]
+    ["fa-forward", "Sans génériques", fmtDur(withoutCredits)]
   ];
   if (fillers.size) facts.push(["fa-filter", "Fillers", `${fillers.size} ép.`]);
   if (anime.versions.length > 1) facts.push(["fa-code-branch", "Versions", anime.versions.map((x) => x.label).join(", ")]);
   if (r.status) facts.push(["fa-signal", "Statut", STATUS_FR[r.status] || r.status]);
-  if (years) facts.push(["fa-calendar", "Première diffusion", years]);
+  if (year) facts.push(["fa-calendar", "Première diffusion", year]);
   if (studio) facts.push(["fa-building", "Studio", studio]);
   if (r.averageScore) facts.push(["fa-star", "Note AniList", `${r.averageScore} / 100`]);
 
@@ -693,10 +728,15 @@ function renderDetails(remote, state = "") {
     return `<tr><td>${escapeHtml(s.name)}</td><td>${s.eps > 1 ? `${s.first}–${last}` : s.first}</td><td>${fmtDur(s.eps * epTime(s))}</td></tr>`;
   }).join("");
 
-  const synopsis = cleanDescription(r.description);
+  const cover = r.coverImage
+    ? `<button type="button" class="cover-btn" id="coverBtn" aria-label="Agrandir l'affiche">
+         <img src="${escapeHtml(r.coverImage.large)}" alt="Affiche de ${escapeHtml(title)}" loading="lazy">
+       </button>`
+    : "";
+
   els.detailsBody.innerHTML = `
     <div class="details-head">
-      ${r.coverImage ? `<img src="${escapeHtml(r.coverImage.large)}" alt="Affiche de ${escapeHtml(title)}" loading="lazy">` : ""}
+      ${cover}
       <div>
         <h3>${escapeHtml(title)}</h3>
         ${orig ? `<p class="orig">${escapeHtml(orig)}</p>` : ""}
@@ -704,16 +744,21 @@ function renderDetails(remote, state = "") {
       </div>
     </div>
     <dl class="facts">${facts.map(([ic, k, val]) => `<div><dt><i class="fa-solid ${ic}" aria-hidden="true"></i>${k}</dt><dd>${escapeHtml(val)}</dd></div>`).join("")}</dl>
-    ${synopsis ? `<p class="synopsis">${escapeHtml(synopsis)}</p>` : ""}
+    <div id="synopsis"></div>
     ${v.seasons.length > 1 ? `<table class="seasons"><thead><tr><th>Saison / arc</th><th>Épisodes</th><th>Durée</th></tr></thead><tbody>${seasonsRows}</tbody></table>` : ""}
-    <p class="src">${state || (r.siteUrl ? `Affiche, synopsis (en anglais) et note : <a href="${escapeHtml(r.siteUrl)}" target="_blank" rel="noopener">fiche AniList</a>.` : "")}</p>
+    <p class="src">${state || (r.siteUrl ? `Affiche, synopsis et note : <a href="${escapeHtml(r.siteUrl)}" target="_blank" rel="noopener">fiche AniList</a>.` : "")}</p>
   `;
+
+  const coverBtn = $("coverBtn");
+  if (coverBtn) coverBtn.addEventListener("click", () => openCover(r.coverImage.extraLarge || r.coverImage.large, title));
+  renderSynopsis();
 }
 
 const detailsKey = () => `${anime.id}:${currentVersion().id}`;
 
 async function loadDetails() {
-  if (!anime || anime.manual) { renderDetails(null); return; }
+  if (!anime) return;
+  if (anime.manual) { renderDetails(null); return; }
   const a = anime;
   const key = detailsKey();
   if (detailsCache.has(key)) { renderDetails(detailsCache.get(key)); return; }
@@ -727,14 +772,159 @@ async function loadDetails() {
   }
 }
 
+// Appelée à chaque changement du formulaire : garde la fiche à jour sans refaire de requête inutile.
 function refreshDetails() {
-  if (!anime) { els.details.hidden = true; return; }
-  els.details.hidden = false;
-  if (els.details.open) loadDetails();
+  if (!anime) return;
+  if (detailsTabOpen()) loadDetails();
   else renderDetails(detailsCache.get(detailsKey()) || null);
 }
 
-els.details.addEventListener("toggle", () => { if (els.details.open) loadDetails(); });
+/* ---------- Synopsis : traduction française ---------- */
+
+// Service de traduction public de Google, gratuit et sans clé. Pas de garantie de disponibilité :
+// en cas d'échec, on affiche le texte original.
+const TRANSLATE_URL = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=fr&dt=t&q=";
+const TRANSLATE_CHUNK = 1500; // caractères par requête, pour garder une URL courte
+const LANG_KEY = "anime-clock:synopsis-lang";
+const TRANSLATION_PREFIX = "anime-clock:fr:";
+
+const translations = new Map(); // id AniList → { status: "loading" | "done" | "error", text }
+
+let synopsisLang = "fr";
+try { if (localStorage.getItem(LANG_KEY) === "original") synopsisLang = "original"; } catch (e) { /* défaut : français */ }
+
+// Découpe le texte en morceaux de paragraphes entiers (ou de phrases si un paragraphe est trop long).
+function splitForTranslation(text) {
+  const parts = text.split(/(?<=\n)/).flatMap((p) => (p.length > TRANSLATE_CHUNK ? p.split(/(?<=[.!?] )/) : [p]));
+  const chunks = [];
+  let current = "";
+  for (const p of parts) {
+    if (current && current.length + p.length > TRANSLATE_CHUNK) { chunks.push(current); current = ""; }
+    current += p;
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+async function translateToFrench(text) {
+  let out = "";
+  for (const chunk of splitForTranslation(text)) {
+    const res = await fetch(TRANSLATE_URL + encodeURIComponent(chunk));
+    if (!res.ok) throw new Error(res.status);
+    const json = await res.json();
+    out += json[0].map((segment) => segment[0]).join("");
+  }
+  return out;
+}
+
+async function ensureTranslation(id, text) {
+  if (translations.has(id)) return;
+  let stored = null;
+  try { stored = localStorage.getItem(TRANSLATION_PREFIX + id); } catch (e) { stored = null; }
+  if (stored) { translations.set(id, { status: "done", text: stored }); return; }
+
+  translations.set(id, { status: "loading" });
+  try {
+    const fr = await translateToFrench(text);
+    translations.set(id, { status: "done", text: fr });
+    try { localStorage.setItem(TRANSLATION_PREFIX + id, fr); } catch (e) { /* pas de cache durable */ }
+  } catch (e) {
+    translations.set(id, { status: "error" });
+  }
+  if (shownDetails && shownDetails.id === id) renderSynopsis();
+}
+
+function renderSynopsis() {
+  const box = $("synopsis");
+  if (!box) return;
+  const r = shownDetails;
+  const original = r ? cleanDescription(r.description) : "";
+  if (!original) { box.innerHTML = ""; return; }
+
+  let text = original;
+  let note = "";
+  if (synopsisLang === "fr") {
+    const t = translations.get(r.id);
+    if (!t) ensureTranslation(r.id, original);
+    if (t && t.status === "done") {
+      text = t.text;
+      note = "Traduction automatique.";
+    } else if (t && t.status === "error") {
+      note = "Traduction indisponible, texte original affiché.";
+    } else {
+      note = "Traduction en cours…";
+    }
+  }
+
+  box.innerHTML = `
+    <div class="syn-head">
+      <h4>Synopsis</h4>
+      <div class="lang-toggle" role="group" aria-label="Langue du synopsis">
+        <button type="button" data-lang="fr" aria-pressed="${synopsisLang === "fr"}">Français</button>
+        <button type="button" data-lang="original" aria-pressed="${synopsisLang === "original"}">Original</button>
+      </div>
+    </div>
+    <p class="synopsis">${escapeHtml(text)}</p>
+    ${note ? `<p class="syn-note">${note}</p>` : ""}
+  `;
+  box.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", () => {
+    synopsisLang = b.dataset.lang;
+    try { localStorage.setItem(LANG_KEY, synopsisLang); } catch (e) { /* choix non mémorisé */ }
+    renderSynopsis();
+  }));
+}
+
+/* ---------- Affiche en grand ---------- */
+
+function openCover(src, title) {
+  els.coverBig.src = src;
+  els.coverBig.alt = `Affiche de ${title}`;
+  els.coverModal.showModal();
+}
+
+els.coverClose.addEventListener("click", () => els.coverModal.close());
+// Un clic sur l'image ou sur le fond grisé ferme aussi la fenêtre.
+els.coverModal.addEventListener("click", () => els.coverModal.close());
+els.coverModal.addEventListener("close", () => { els.coverBig.removeAttribute("src"); });
+
+/* ---------- Paramètres : thème ---------- */
+
+const THEME_KEY = "anime-clock:theme";
+
+function applyTheme(theme) {
+  if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+}
+
+function initTheme() {
+  let theme = "auto";
+  try { theme = localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { /* thème du système */ }
+  const radio = document.querySelector(`input[name="theme"][value="${theme}"]`) || document.querySelector('input[name="theme"][value="auto"]');
+  radio.checked = true;
+  applyTheme(radio.value);
+  document.querySelectorAll('input[name="theme"]').forEach((r) => r.addEventListener("change", () => {
+    applyTheme(r.value);
+    try { localStorage.setItem(THEME_KEY, r.value); } catch (e) { /* choix non mémorisé */ }
+  }));
+}
+
+function toggleSettings(open) {
+  els.settingsMenu.hidden = !open;
+  els.settingsBtn.setAttribute("aria-expanded", String(open));
+}
+
+els.settingsBtn.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleSettings(els.settingsMenu.hidden);
+});
+document.addEventListener("click", (e) => {
+  if (!els.settingsMenu.hidden && !els.settingsMenu.contains(e.target)) toggleSettings(false);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !els.settingsMenu.hidden) { toggleSettings(false); els.settingsBtn.focus(); }
+});
+
+initTheme();
 
 /* ---------- Événements ---------- */
 
@@ -749,8 +939,9 @@ els.form.addEventListener("submit", (e) => {
   e.preventDefault();
   if (calculate()) {
     calculated = true;
+    selectTab(els.tabCalc);
     if (window.matchMedia("(max-width: 899px)").matches) {
-      els.result.scrollIntoView({ behavior: "smooth", block: "start" });
+      els.panelCalc.closest(".side").scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }
 });

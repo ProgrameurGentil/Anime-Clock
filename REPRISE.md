@@ -12,6 +12,8 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 4. Icônes Font Awesome 6.5.2 Free (Classic) et logo `logo.svg`.
 5. Panneau « Détails de l'anime » replié par défaut, au-dessus du résultat.
 6. Cette doc (`CLAUDE.md` et `REPRISE.md`).
+7. Skills du projet `maj-docs` et `relecture-code` (`.claude/skills/`).
+8. Colonne de droite en onglets Calcul / Détails (sticky), synopsis traduit en français avec bascule vers l'original, affiche en grand dans un modal, menu paramètres avec choix du thème.
 
 `git log --oneline` donne l'historique détaillé.
 
@@ -31,7 +33,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 - **Catalogue figé à fin 2025** : One Piece s'arrête à l'épisode 1122. JJK saison 3, MHA saison finale, Spy x Family saison 3, One Punch Man saison 3 et Frieren saison 2 manquent. Fire Force a ses 4 parties (jusqu'à la saison 3 partie 2, 2026).
 - **Listes de fillers** (One Piece, Naruto, Shippuden, Bleach) : reprises des listes de fans, à prendre comme repère.
 - **DBZ Kai** : 98 + 69 épisodes (numérotation internationale). AniList compte 97 pour Kai.
-- **Synopsis en anglais** : AniList ne fournit pas de français.
+- **Synopsis** : AniList ne fournit que l'anglais. La traduction passe par le service public Google (`client=gtx`), gratuit mais non officiel : il peut couper ou limiter sans prévenir. Le site retombe alors sur le texte original.
 - Sur AniList, chaque saison est une fiche séparée. Pour enchaîner plusieurs saisons d'un anime hors catalogue, il faut l'ajouter dans `data.js`.
 - Le serveur de test servait `.svg` en binaire au début, ce qui cassait le logo. C'est corrigé dans `scripts/serve.js`. Si une ressource ne s'affiche pas, vérifier les types MIME de ce script.
 - La fin de ligne : Git convertit LF en CRLF sur cette machine Windows (avertissements sans gravité).
@@ -42,7 +44,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 - Regrouper automatiquement les saisons d'un même anime trouvé sur AniList (relations `PREQUEL` / `SEQUEL`).
 - Fillers pour Fairy Tail et DBZ.
 - Bouton pour copier ou partager le résultat.
-- Traduire le synopsis ou afficher un résumé court en français.
+- Autres réglages dans le menu paramètres (langue par défaut du synopsis, durée de générique par défaut…).
 - Hébergement gratuit (GitHub Pages ou Netlify) : aucun build, il suffit de publier le dossier.
 
 ## Préférences de l'utilisateur
