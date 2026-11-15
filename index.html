@@ -5,30 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anime Clock</title>
   <meta name="description" content="Combien d'épisodes tu peux regarder avant de devoir t'arrêter.">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-  <link rel="icon" href="logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
+
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/form.css">
+  <link rel="stylesheet" href="css/panels.css">
+
   <script>
-    // Applique le thème choisi avant l'affichage, pour éviter un flash de l'autre thème.
+    // Applique le thème enregistré avant l'affichage, pour éviter un flash de l'autre thème.
     try {
-      const t = localStorage.getItem("anime-clock:theme");
-      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
-    } catch (e) { /* stockage indisponible : thème du système */ }
+      const savedTheme = localStorage.getItem("anime-clock:theme");
+      if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme;
+    } catch { /* stockage indisponible : thème du système */ }
   </script>
 </head>
 <body>
-  <header class="top">
-    <div class="top-row">
-      <h1><img class="logo" src="logo.svg" alt="" width="44" height="44"> Anime Clock</h1>
+  <header class="site-header">
+    <div class="site-header-row">
+      <h1 class="site-title"><img class="site-logo" src="assets/logo.svg" alt="" width="44" height="44"> Anime Clock</h1>
+
       <div class="settings">
-        <button type="button" id="settingsBtn" class="icon-btn" aria-label="Paramètres" aria-haspopup="true" aria-expanded="false" aria-controls="settingsMenu">
+        <button type="button" id="settingsButton" class="icon-button" aria-label="Paramètres" aria-haspopup="true" aria-expanded="false" aria-controls="settingsMenu">
           <i class="fa-solid fa-gear" aria-hidden="true"></i>
         </button>
         <div id="settingsMenu" class="settings-menu" hidden>
-          <p class="menu-title">Thème</p>
+          <p class="settings-menu-title">Thème</p>
           <div class="theme-choice" role="radiogroup" aria-label="Thème">
             <label><input type="radio" name="theme" value="auto"> <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i> Auto</label>
             <label><input type="radio" name="theme" value="light"> <i class="fa-regular fa-sun" aria-hidden="true"></i> Clair</label>
@@ -41,132 +47,134 @@
   </header>
 
   <main class="layout">
-    <form id="form" class="card" autocomplete="off" novalidate>
-      <!-- 1. Anime -->
-      <section class="step">
-        <h2><span class="num"><i class="fa-solid fa-tv"></i></span> L'anime</h2>
+    <form id="plannerForm" class="card" autocomplete="off" novalidate>
 
-        <div class="field combo">
-          <label for="search">Titre <span class="req" aria-hidden="true">*</span></label>
+      <!-- 1. L'anime -->
+      <section class="form-step">
+        <h2><span class="step-icon"><i class="fa-solid fa-tv" aria-hidden="true"></i></span> L'anime</h2>
+
+        <div class="field search-field">
+          <label for="animeSearch">Titre <span class="required" aria-hidden="true">*</span></label>
           <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-          <input id="search" type="search" aria-required="true" placeholder="One Piece, Naruto, Frieren…" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
+          <input id="animeSearch" type="search" aria-required="true" placeholder="One Piece, Naruto, Frieren…"
+                 role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
           <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
           <p id="animeInfo" class="hint"></p>
         </div>
 
-        <div class="row">
-          <div class="field grow">
-            <label for="season">Saison / arc <span class="req" aria-hidden="true">*</span></label>
+        <div class="field-row">
+          <div class="field field-wide">
+            <label for="season">Saison / arc <span class="required" aria-hidden="true">*</span></label>
             <select id="season" disabled></select>
           </div>
           <div class="field">
-            <label for="episode">Épisode de départ</label>
-            <input id="episode" type="number" min="1" inputmode="numeric" placeholder="début" disabled>
+            <label for="startEpisode">Épisode de départ</label>
+            <input id="startEpisode" type="number" min="1" inputmode="numeric" placeholder="début" disabled>
           </div>
         </div>
 
-        <details class="advanced" id="animeAdvanced">
-          <summary><i class="fa-solid fa-sliders"></i> Avancé</summary>
-          <div class="field" id="versionField">
+        <details id="animeAdvanced" class="advanced">
+          <summary><i class="fa-solid fa-sliders" aria-hidden="true"></i> Avancé</summary>
+          <div id="versionField" class="field">
             <label for="version">Version</label>
             <select id="version"></select>
             <p class="hint">Normale ou Kai, 1999 ou 2011… selon l'anime.</p>
           </div>
-          <label class="check" id="fillerField" hidden>
+          <label id="fillerField" class="checkbox" hidden>
             <input type="checkbox" id="skipFillers"> Sauter les épisodes filler
           </label>
-          <label class="check">
-            <input type="checkbox" id="staySeason"> Ne pas dépasser la fin de la saison
+          <label class="checkbox">
+            <input type="checkbox" id="stayInSeason"> Ne pas dépasser la fin de la saison
           </label>
-          <div class="row">
+          <div class="field-row">
             <div class="field">
-              <label for="epDur">Durée d'un épisode (min)</label>
-              <input id="epDur" type="number" min="1" step="any" inputmode="decimal">
+              <label for="episodeDuration">Durée d'un épisode (min)</label>
+              <input id="episodeDuration" type="number" min="1" step="any" inputmode="decimal">
             </div>
-            <div class="field">
-              <label for="epCount" id="epCountLabel">Nombre d'épisodes</label>
-              <input id="epCount" type="number" min="1" inputmode="numeric">
+            <div id="episodeCountField" class="field" hidden>
+              <label for="episodeCount" id="episodeCountLabel">Nombre d'épisodes</label>
+              <input id="episodeCount" type="number" min="1" inputmode="numeric">
             </div>
           </div>
         </details>
       </section>
 
-      <!-- 2. Temps -->
-      <section class="step">
-        <h2><span class="num"><i class="fa-regular fa-clock"></i></span> Ton temps</h2>
+      <!-- 2. Le temps disponible -->
+      <section class="form-step">
+        <h2><span class="step-icon"><i class="fa-regular fa-clock" aria-hidden="true"></i></span> Ton temps</h2>
         <div class="segmented" role="radiogroup" aria-label="Type de limite">
-          <label><input type="radio" name="mode" value="duration" checked> <i class="fa-solid fa-hourglass-half"></i> Une durée</label>
-          <label><input type="radio" name="mode" value="until"> <i class="fa-solid fa-flag-checkered"></i> Une heure de fin</label>
+          <label><input type="radio" name="timeMode" value="duration" checked> <i class="fa-solid fa-hourglass-half" aria-hidden="true"></i> Une durée</label>
+          <label><input type="radio" name="timeMode" value="endTime"> <i class="fa-solid fa-flag-checkered" aria-hidden="true"></i> Une heure de fin</label>
         </div>
 
         <div id="durationBox">
-          <div class="row">
+          <div class="field-row">
             <div class="field">
-              <label for="hours">Heures <span class="req" aria-hidden="true">*</span></label>
+              <label for="hours">Heures <span class="required" aria-hidden="true">*</span></label>
               <input id="hours" type="number" min="0" max="72" value="2" inputmode="numeric">
             </div>
             <div class="field">
-              <label for="minutes">Minutes <span class="req" aria-hidden="true">*</span></label>
+              <label for="minutes">Minutes <span class="required" aria-hidden="true">*</span></label>
               <input id="minutes" type="number" min="0" max="59" value="0" inputmode="numeric">
             </div>
           </div>
-          <div class="chips" aria-label="Raccourcis">
-            <button type="button" data-min="30">30 min</button>
-            <button type="button" data-min="60">1 h</button>
-            <button type="button" data-min="120">2 h</button>
-            <button type="button" data-min="180">3 h</button>
-            <button type="button" data-endofday><i class="fa-solid fa-moon"></i> Jusqu'à minuit</button>
+          <div id="timeShortcuts" class="shortcuts" aria-label="Raccourcis">
+            <button type="button" data-minutes="30">30 min</button>
+            <button type="button" data-minutes="60">1 h</button>
+            <button type="button" data-minutes="120">2 h</button>
+            <button type="button" data-minutes="180">3 h</button>
+            <button type="button" data-until-midnight><i class="fa-solid fa-moon" aria-hidden="true"></i> Jusqu'à minuit</button>
           </div>
         </div>
 
-        <div id="untilBox" hidden>
+        <div id="endTimeBox" hidden>
           <div class="field">
-            <label for="until">Je dois arrêter à <span class="req" aria-hidden="true">*</span></label>
-            <input id="until" type="time" value="23:00">
+            <label for="endTime">Je dois arrêter à <span class="required" aria-hidden="true">*</span></label>
+            <input id="endTime" type="time" value="23:00">
           </div>
-          <p id="untilHint" class="hint"></p>
+          <p id="endTimeHint" class="hint"></p>
         </div>
       </section>
 
-      <!-- 3. Génériques -->
-      <section class="step">
-        <h2><span class="num"><i class="fa-solid fa-music"></i></span> Génériques</h2>
-        <label class="check"><input type="checkbox" id="skipOp" checked> <i class="fa-solid fa-forward"></i> Je saute les intros</label>
-        <label class="check"><input type="checkbox" id="skipEd" checked> <i class="fa-solid fa-forward-step"></i> Je saute les outros</label>
+      <!-- 3. Les génériques -->
+      <section class="form-step">
+        <h2><span class="step-icon"><i class="fa-solid fa-music" aria-hidden="true"></i></span> Génériques</h2>
+        <label class="checkbox"><input type="checkbox" id="skipOpenings" checked> <i class="fa-solid fa-forward" aria-hidden="true"></i> Je saute les intros</label>
+        <label class="checkbox"><input type="checkbox" id="skipEndings" checked> <i class="fa-solid fa-forward-step" aria-hidden="true"></i> Je saute les outros</label>
 
         <details class="advanced">
-          <summary><i class="fa-solid fa-sliders"></i> Avancé</summary>
-          <div class="row">
+          <summary><i class="fa-solid fa-sliders" aria-hidden="true"></i> Avancé</summary>
+          <div class="field-row">
             <div class="field">
-              <label for="opKeep">Intros que je regarde quand même</label>
-              <input id="opKeep" type="number" min="0" value="0" inputmode="numeric">
+              <label for="openingsKept">Intros que je regarde quand même</label>
+              <input id="openingsKept" type="number" min="0" value="0" inputmode="numeric">
             </div>
             <div class="field">
-              <label for="edKeep">Outros que je regarde quand même</label>
-              <input id="edKeep" type="number" min="0" value="0" inputmode="numeric">
+              <label for="endingsKept">Outros que je regarde quand même</label>
+              <input id="endingsKept" type="number" min="0" value="0" inputmode="numeric">
             </div>
           </div>
           <p class="hint">Compté sur les premiers épisodes de la session. Pratique quand tu veux écouter le nouvel opening une fois.</p>
-          <div class="row">
+          <div class="field-row">
             <div class="field">
-              <label for="opDur">Durée de l'intro (s)</label>
-              <input id="opDur" type="number" min="0" inputmode="numeric">
+              <label for="openingDuration">Durée de l'intro (s)</label>
+              <input id="openingDuration" type="number" min="0" inputmode="numeric">
             </div>
             <div class="field">
-              <label for="edDur">Durée de l'outro (s)</label>
-              <input id="edDur" type="number" min="0" inputmode="numeric">
+              <label for="endingDuration">Durée de l'outro (s)</label>
+              <input id="endingDuration" type="number" min="0" inputmode="numeric">
             </div>
           </div>
         </details>
       </section>
 
-      <!-- 4. Bonus -->
-      <section class="step">
+      <!-- 4. Vitesse et pauses -->
+      <section class="form-step">
         <details class="advanced">
-          <summary><i class="fa-solid fa-gauge-high"></i> Vitesse et pauses</summary>
+          <summary><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> Vitesse et pauses</summary>
           <div class="field">
-            <label for="speed">Vitesse de lecture</label>
-            <select id="speed">
+            <label for="playbackSpeed">Vitesse de lecture</label>
+            <select id="playbackSpeed">
               <option value="1">×1</option>
               <option value="1.25">×1,25</option>
               <option value="1.5">×1,5</option>
@@ -175,49 +183,64 @@
             </select>
           </div>
           <div class="field">
-            <label for="pause">Pause entre deux épisodes (min)</label>
-            <input id="pause" type="number" min="0" value="0" step="any" inputmode="decimal">
+            <label for="pauseMinutes">Pause entre deux épisodes (min)</label>
+            <input id="pauseMinutes" type="number" min="0" value="0" step="any" inputmode="decimal">
           </div>
         </details>
       </section>
 
-      <p class="hint reqnote"><span class="req">*</span> champ obligatoire</p>
-      <button type="submit" class="go" id="go"><i class="fa-solid fa-calculator"></i> Calculer</button>
-      <p id="formError" class="error" role="alert"></p>
+      <p class="hint required-note"><span class="required">*</span> champ obligatoire</p>
+      <button type="submit" class="submit-button"><i class="fa-solid fa-calculator" aria-hidden="true"></i> Calculer</button>
+      <p id="formError" class="form-error" role="alert"></p>
     </form>
 
+    <!-- Colonne de droite : onglets Calcul / Détails -->
     <div class="side card">
       <div class="tabs" role="tablist" aria-label="Résultat et fiche de l'anime">
-        <button type="button" role="tab" id="tabCalc" aria-controls="panelCalc" aria-selected="true">
+        <button type="button" role="tab" id="tabCalculation" aria-controls="panelCalculation" aria-selected="true">
           <i class="fa-solid fa-calculator" aria-hidden="true"></i> Calcul
         </button>
         <button type="button" role="tab" id="tabDetails" aria-controls="panelDetails" aria-selected="false" tabindex="-1">
           <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Détails de l'anime
         </button>
       </div>
-      <section id="panelCalc" class="panel" role="tabpanel" aria-labelledby="tabCalc" tabindex="0">
+      <section id="panelCalculation" class="tab-panel" role="tabpanel" aria-labelledby="tabCalculation" tabindex="0">
         <div id="result" class="result" aria-live="polite">
-          <p class="empty"><i class="fa-regular fa-hourglass-half" aria-hidden="true"></i> Choisis un anime et ton temps, puis lance le calcul.</p>
+          <p class="empty-state"><i class="fa-regular fa-hourglass-half" aria-hidden="true"></i> Choisis un anime et ton temps, puis lance le calcul.</p>
         </div>
       </section>
-      <section id="panelDetails" class="panel" role="tabpanel" aria-labelledby="tabDetails" tabindex="0" hidden>
-        <div id="detailsBody" class="details-body">
-          <p class="empty"><i class="fa-solid fa-tv" aria-hidden="true"></i> Choisis un anime pour voir sa fiche.</p>
+      <section id="panelDetails" class="tab-panel" role="tabpanel" aria-labelledby="tabDetails" tabindex="0" hidden>
+        <div id="details">
+          <p class="empty-state"><i class="fa-solid fa-tv" aria-hidden="true"></i> Choisis un anime pour voir sa fiche.</p>
         </div>
       </section>
     </div>
   </main>
 
-  <dialog id="coverModal" class="modal" aria-label="Affiche en grand">
-    <button type="button" class="modal-close" id="coverClose" aria-label="Fermer"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-    <img id="coverBig" alt="">
+  <dialog id="coverModal" class="cover-modal" aria-label="Affiche en grand">
+    <button type="button" class="cover-close" aria-label="Fermer"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    <img id="coverImage" alt="">
   </dialog>
 
-  <footer class="foot">
+  <footer class="site-footer">
     <p>Durées moyennes, à quelques secondes près. Les listes de fillers viennent des listes tenues par les fans. Recherche hors catalogue via <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, avec <a href="https://jikan.moe" target="_blank" rel="noopener">Jikan</a> (MyAnimeList) en secours.</p>
   </footer>
 
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <!-- Ordre important : chaque script utilise ceux chargés avant lui. main.js démarre la page. -->
+  <script src="js/config.js"></script>
+  <script src="js/dom.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/catalog.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/selection.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/time-budget.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/result-view.js"></script>
+  <script src="js/details-view.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/persistence.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

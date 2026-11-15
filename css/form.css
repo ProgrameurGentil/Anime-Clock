@@ -1,0 +1,172 @@
+/* Formulaire : étapes, champs, recherche, choix du mode de temps, bouton Calculer. */
+
+/* ---------- Étapes ---------- */
+
+.form-step + .form-step { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--color-border); }
+.form-step h2 {
+  margin: 0 0 12px;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 13px;
+}
+
+/* ---------- Champs ---------- */
+
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; min-width: 0; }
+.field label { font-size: 14px; font-weight: 500; }
+.field-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.field-row > .field { flex: 1 1 140px; }
+.field-row > .field-wide { flex: 2 1 200px; }
+
+.required { color: var(--color-accent); font-weight: 700; }
+.required-note { margin-top: 16px; }
+
+input[type="search"], input[type="number"], input[type="time"], select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  font: inherit;
+  color: inherit;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+input:disabled, select:disabled { opacity: .55; }
+
+.hint { margin: 2px 0 0; color: var(--color-muted); font-size: 13px; }
+.form-error { min-height: 1em; margin: 10px 0 0; color: var(--color-accent); font-size: 14px; }
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+.checkbox input { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.checkbox i { width: 16px; color: var(--color-muted); text-align: center; }
+
+/* Blocs « Avancé » repliables */
+.advanced { margin-top: 4px; }
+.advanced summary {
+  padding: 6px 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.advanced summary i { margin-right: 4px; }
+.advanced[open] summary { margin-bottom: 8px; }
+
+/* ---------- Recherche avec suggestions ---------- */
+
+.search-field { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 37px;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+.search-field input[type="search"] { padding-left: 38px; }
+
+.suggestions {
+  position: absolute;
+  top: 74px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 340px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.suggestions li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.suggestions li[aria-selected="true"], .suggestions li:hover { background: var(--color-surface-alt); }
+.suggestions .suggestion-group {
+  padding-top: 10px;
+  color: var(--color-muted);
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: default;
+}
+.suggestions .suggestion-group:hover { background: none; }
+.suggestion-meta { color: var(--color-muted); font-size: 13px; white-space: nowrap; }
+
+/* ---------- Choix « Une durée / Une heure de fin » ---------- */
+
+.segmented {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 3px;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+.segmented label {
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.segmented i { margin-right: 4px; }
+.segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.segmented label:has(input:checked) { background: var(--color-accent-soft); color: var(--color-accent); font-weight: 700; }
+.segmented label:has(input:focus-visible) { outline: 2px solid var(--color-accent); }
+
+/* Raccourcis 30 min, 1 h… */
+.shortcuts { display: flex; flex-wrap: wrap; gap: 8px; }
+.shortcuts button {
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.shortcuts button i { margin-right: 4px; }
+.shortcuts button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ---------- Bouton Calculer ---------- */
+
+.submit-button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-on-accent);
+  background: var(--color-accent);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.submit-button i { margin-right: 4px; }
+.submit-button:hover { filter: brightness(1.05); }

@@ -1,6 +1,8 @@
 services:
   anime-clock:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: anime-clock
     ports:
       - "8080:80"

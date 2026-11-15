@@ -1,7 +1,8 @@
+# Seuls index.html, assets/, css/, js/ et docker/nginx.conf entrent dans l'image.
 .git
 .claude
+docs
 scripts
 *.md
-Dockerfile
+LICENSE
 docker-compose.yml
-.dockerignore

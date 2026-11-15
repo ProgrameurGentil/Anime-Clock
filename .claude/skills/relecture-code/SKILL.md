@@ -5,7 +5,7 @@ description: Relit le code écrit pour Anime Clock, l'optimise et le clarifie po
 
 # Relecture qualité du code
 
-Objectif : un développeur qui ouvre `app.js`, `styles.css`, `index.html` ou `data.js` pour la première fois comprend ce que fait chaque bloc sans avoir à exécuter le code. Le comportement visible ne change pas.
+Objectif : un développeur qui ouvre un fichier de `js/`, `css/` ou `index.html` pour la première fois comprend ce que fait chaque bloc sans avoir à exécuter le code. Le comportement visible ne change pas.
 
 ## Périmètre
 
@@ -19,12 +19,13 @@ Pour chaque fichier, passe dans cet ordre et note ce qui accroche.
 1. **Exactitude** (avant tout le reste)
    - Cas limites : saison vide, épisode hors plage, temps nul, anime sans durée, API qui répond vide ou pas du tout.
    - Asynchrone : une réponse lente ne doit pas écraser l'affichage d'un anime choisi depuis (comparer l'anime courant avant de rendre).
-   - Tout accès à `localStorage` est dans un `try/catch`.
+   - `localStorage` passe uniquement par `readStorage` / `writeStorage` / `removeStorage` (`js/utils.js`).
    - Tout texte venant d'une API ou de l'utilisateur passe par `escapeHtml` avant `innerHTML`.
 2. **Lisibilité**
-   - Noms qui disent ce que la chose contient (`watchedEpisodes` plutôt que `w`, sauf dans un callback de deux lignes).
+   - Noms qui disent ce que la chose contient (`watchedEpisodes` plutôt que `w`). Aucune variable d'une lettre, callbacks compris.
    - Une fonction = une responsabilité. Au-delà d'environ 60 lignes, chercher un découpage naturel.
-   - Pas de nombre magique : une constante nommée en haut du fichier ou un commentaire d'une ligne.
+   - Pas de nombre magique : une constante nommée dans `js/config.js`.
+   - Chaque fonction est dans le fichier de son rôle (voir l'arborescence de `CLAUDE.md`).
    - Commentaires sur le *pourquoi*, pas sur le *quoi*. Supprimer ceux qui répètent le code.
    - Sections du fichier balisées par les bandeaux `/* ---------- Titre ---------- */`, dans un ordre logique.
 3. **Simplicité**
@@ -36,7 +37,7 @@ Pour chaque fichier, passe dans cet ordre et note ce qui accroche.
    - Pas de recalcul lourd à chaque frappe sans anti-rebond.
    - Les boucles sur One Piece (plus de 1100 épisodes) restent instantanées.
 5. **CSS et HTML**
-   - Couleurs via les tokens `--…` de `:root`, jamais en dur (sauf `logo.svg`).
+   - Couleurs via les variables `--color-*` de `css/base.css`, jamais en dur (sauf `assets/logo.svg`).
    - Sélecteurs courts, pas de `!important` hors `[hidden]`.
    - Accessibilité : `label` lié à chaque champ, `aria-*` sur les composants maison (onglets, menu, modal), focus visible, navigation clavier.
    - Mobile 375 px : aucun défilement horizontal.
@@ -47,7 +48,7 @@ Pour chaque fichier, passe dans cet ordre et note ce qui accroche.
 2. Liste les problèmes trouvés, classés : exactitude, puis lisibilité, puis le reste.
 3. Corrige par petites modifications (Edit), une intention à la fois.
 4. Vérifie dans le navigateur (aperçu `anime-clock` de `.claude/launch.json`) :
-   - Le cas de référence de `REPRISE.md` donne toujours le même résultat.
+   - Le cas de référence de `docs/REPRISE.md` donne toujours le même résultat.
    - La console ne montre pas de nouvelle erreur.
    - Les parties touchées marchent au clic et au clavier, en bureau et en 375 px.
 5. Résume à l'utilisateur ce qui a changé et pourquoi, en quelques lignes. Signale ce que tu as vu sans le corriger.
