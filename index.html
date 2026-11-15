@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anime Clock</title>
+  <meta name="description" content="Combien d'épisodes tu peux regarder avant de devoir t'arrêter.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1><span class="logo" aria-hidden="true">◷</span> Anime Clock</h1>
+    <p class="tagline">Dis-moi combien de temps tu as, je te dis combien d'épisodes tu peux enchaîner.</p>
+  </header>
+
+  <main class="layout">
+    <form id="form" class="card" autocomplete="off" novalidate>
+      <!-- 1. Anime -->
+      <section class="step">
+        <h2><span class="num">1</span> L'anime</h2>
+
+        <div class="field combo">
+          <label for="search">Titre</label>
+          <input id="search" type="search" placeholder="One Piece, Naruto, Frieren…" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
+          <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+          <p id="animeInfo" class="hint"></p>
+        </div>
+
+        <div class="row">
+          <div class="field grow">
+            <label for="season">Saison / arc</label>
+            <select id="season" disabled></select>
+          </div>
+          <div class="field">
+            <label for="episode">Épisode de départ <span class="opt">optionnel</span></label>
+            <input id="episode" type="number" min="1" inputmode="numeric" placeholder="début" disabled>
+          </div>
+        </div>
+
+        <details class="advanced" id="animeAdvanced">
+          <summary>Avancé</summary>
+          <div class="field" id="versionField">
+            <label for="version">Version</label>
+            <select id="version"></select>
+            <p class="hint">Normale ou Kai, 1999 ou 2011… selon l'anime.</p>
+          </div>
+          <label class="check" id="fillerField" hidden>
+            <input type="checkbox" id="skipFillers"> Sauter les épisodes filler
+          </label>
+          <label class="check">
+            <input type="checkbox" id="staySeason"> Ne pas dépasser la fin de la saison
+          </label>
+          <div class="row">
+            <div class="field">
+              <label for="epDur">Durée d'un épisode (min)</label>
+              <input id="epDur" type="number" min="1" step="any" inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="epCount" id="epCountLabel">Nombre d'épisodes</label>
+              <input id="epCount" type="number" min="1" inputmode="numeric">
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- 2. Temps -->
+      <section class="step">
+        <h2><span class="num">2</span> Ton temps</h2>
+        <div class="segmented" role="radiogroup" aria-label="Type de limite">
+          <label><input type="radio" name="mode" value="duration" checked> Une durée</label>
+          <label><input type="radio" name="mode" value="until"> Une heure de fin</label>
+        </div>
+
+        <div id="durationBox">
+          <div class="row">
+            <div class="field">
+              <label for="hours">Heures</label>
+              <input id="hours" type="number" min="0" max="72" value="2" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="minutes">Minutes</label>
+              <input id="minutes" type="number" min="0" max="59" value="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="chips" aria-label="Raccourcis">
+            <button type="button" data-min="30">30 min</button>
+            <button type="button" data-min="60">1 h</button>
+            <button type="button" data-min="120">2 h</button>
+            <button type="button" data-min="180">3 h</button>
+            <button type="button" data-min="480">Journée</button>
+          </div>
+        </div>
+
+        <div id="untilBox" hidden>
+          <div class="field">
+            <label for="until">Je dois arrêter à</label>
+            <input id="until" type="time" value="23:00">
+          </div>
+          <p id="untilHint" class="hint"></p>
+        </div>
+      </section>
+
+      <!-- 3. Génériques -->
+      <section class="step">
+        <h2><span class="num">3</span> Génériques</h2>
+        <label class="check"><input type="checkbox" id="skipOp" checked> Je saute les intros</label>
+        <label class="check"><input type="checkbox" id="skipEd" checked> Je saute les outros</label>
+
+        <details class="advanced">
+          <summary>Avancé</summary>
+          <div class="row">
+            <div class="field">
+              <label for="opKeep">Intros que je regarde quand même</label>
+              <input id="opKeep" type="number" min="0" value="0" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="edKeep">Outros que je regarde quand même</label>
+              <input id="edKeep" type="number" min="0" value="0" inputmode="numeric">
+            </div>
+          </div>
+          <p class="hint">Compté sur les premiers épisodes de la session. Pratique quand tu veux écouter le nouvel opening une fois.</p>
+          <div class="row">
+            <div class="field">
+              <label for="opDur">Durée de l'intro (s)</label>
+              <input id="opDur" type="number" min="0" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="edDur">Durée de l'outro (s)</label>
+              <input id="edDur" type="number" min="0" inputmode="numeric">
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- 4. Bonus -->
+      <section class="step">
+        <details class="advanced">
+          <summary>Vitesse et pauses</summary>
+          <div class="field">
+            <label for="speed">Vitesse de lecture</label>
+            <select id="speed">
+              <option value="1">×1</option>
+              <option value="1.25">×1,25</option>
+              <option value="1.5">×1,5</option>
+              <option value="1.75">×1,75</option>
+              <option value="2">×2</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="pause">Pause entre deux épisodes (min)</label>
+            <input id="pause" type="number" min="0" value="0" step="any" inputmode="decimal">
+          </div>
+        </details>
+      </section>
+
+      <button type="submit" class="go" id="go">Calculer</button>
+      <p id="formError" class="error" role="alert"></p>
+    </form>
+
+    <section id="result" class="card result" aria-live="polite" hidden></section>
+  </main>
+
+  <footer class="foot">
+    <p>Durées moyennes, à quelques secondes près. Les listes de fillers viennent des listes tenues par les fans. Recherche hors catalogue via <a href="https://anilist.co" target="_blank" rel="noopener">AniList</a>, avec <a href="https://jikan.moe" target="_blank" rel="noopener">Jikan</a> (MyAnimeList) en secours.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
