@@ -380,8 +380,10 @@ function refreshUntilHint() {
   if (mode() !== "until") return;
   const now = new Date();
   const t = untilTarget(now);
-  const tomorrow = t.getDate() !== now.getDate() ? " (demain)" : "";
-  els.untilHint.textContent = `Il te reste ${fmtDur((t - now) / 1000)}${tomorrow}.`;
+  const midnight = t.getHours() === 0 && t.getMinutes() === 0;
+  const tomorrow = t.getDate() !== now.getDate() && !midnight ? " (demain)" : "";
+  const label = midnight ? " avant la fin de la journée" : "";
+  els.untilHint.textContent = `Il te reste ${fmtDur((t - now) / 1000)}${label}${tomorrow}.`;
 }
 setInterval(() => { refreshUntilHint(); if (calculated && mode() === "until") calculate(); }, 30000);
 
@@ -397,6 +399,14 @@ els.until.addEventListener("input", refreshUntilHint);
 
 document.querySelectorAll(".chips button").forEach((b) => {
   b.addEventListener("click", () => {
+    if ("endofday" in b.dataset) {
+      // Fin de la journée en cours : on bascule sur « heure de fin » à minuit.
+      els.until.value = "00:00";
+      const radio = els.form.querySelector('input[name="mode"][value="until"]');
+      radio.checked = true;
+      radio.dispatchEvent(new Event("change"));
+      return;
+    }
     const total = Number(b.dataset.min);
     els.hours.value = Math.floor(total / 60);
     els.minutes.value = total % 60;
