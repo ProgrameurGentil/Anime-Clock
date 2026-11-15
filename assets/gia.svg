@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 176 48" width="176" height="48" role="img" aria-label="GIA : contenu généré avec l'aide d'une intelligence artificielle">
+  <!-- Pictogramme GIA (Généré par IA) du projet Anime Clock -->
+  <rect x="1" y="1" width="174" height="46" rx="10" fill="#1d1a24" stroke="#e4572e" stroke-width="2"/>
+  <!-- Éclat, comme dans le logo du site -->
+  <path d="M24 9c1.1 7.6 3.4 9.9 11 11-7.6 1.1-9.9 3.4-11 11-1.1-7.6-3.4-9.9-11-11 7.6-1.1 9.9-3.4 11-11z" fill="#f2a541"/>
+  <path d="M36 28c.5 3.3 1.5 4.3 4.8 4.8-3.3.5-4.3 1.5-4.8 4.8-.5-3.3-1.5-4.3-4.8-4.8 3.3-.5 4.3-1.5 4.8-4.8z" fill="#e4572e"/>
+  <text x="50" y="23" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" letter-spacing="1">GIA</text>
+  <text x="50" y="38" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11" fill="#f1edf6">Généré par IA · Claude</text>
+</svg>

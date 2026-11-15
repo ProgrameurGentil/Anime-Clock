@@ -1,8 +1,13 @@
 # Anime Clock
 
-<img src="logo.svg" alt="" width="64" align="right">
+<img src="assets/logo.svg" alt="" width="72" align="right">
 
 Tu as deux heures devant toi, ou jusqu'à minuit ? Anime Clock te dit combien d'épisodes tu peux enchaîner, à quel épisode tu t'arrêtes et à quelle heure tu auras fini.
+
+<img src="assets/gia.svg" alt="GIA : généré par IA avec Claude" width="176">
+
+> **Projet de test et d'expérimentation.**
+> L'intelligence artificielle est utilisée ici uniquement pour tester et expérimenter le développement assisté par IA, sur ce projet seulement. Le code, les textes et la doc ont été écrits avec Claude (Anthropic), à partir des demandes de l'auteur.
 
 ## Fonctionnalités
 
@@ -41,51 +46,101 @@ Puis va sur http://localhost:8080. Pour arrêter :
 docker compose down
 ```
 
-Sans Compose :
+Sans Compose, depuis la racine du projet :
 
 ```bash
-docker build -t anime-clock .
+docker build -f docker/Dockerfile -t anime-clock .
 ```
 
 ```bash
 docker run -d -p 8080:80 --name anime-clock anime-clock
 ```
 
-L'image sert les fichiers avec nginx (`nginx:1.27-alpine`, config dans `docker/nginx.conf`).
+L'image sert seulement `index.html`, `assets/`, `css/` et `js/` avec nginx (`nginx:1.27-alpine`).
 
-## Structure
+## Arborescence
 
-| Fichier | Rôle |
-|---|---|
-| `index.html` | La page |
-| `styles.css` | Thèmes clair et sombre, mise en page responsive |
-| `app.js` | Recherche, calcul, affichage, fiche, paramètres |
-| `data.js` | Catalogue des animes (saisons, durées, fillers) |
-| `logo.svg` | Logo et favicon |
-| `scripts/serve.js` | Serveur de test Node |
-| `Dockerfile`, `docker-compose.yml`, `docker/` | Image Docker |
-| `CLAUDE.md` | Spécifications complètes du projet |
-| `REPRISE.md` | Notes pour reprendre le projet |
+```
+anime-clock/
+├── index.html                 Page unique du site
+├── assets/
+│   ├── logo.svg               Logo et favicon
+│   └── gia.svg                Pictogramme GIA (généré par IA)
+├── css/
+│   ├── base.css               Couleurs, thèmes, en-tête, mise en page
+│   ├── form.css               Formulaire
+│   └── panels.css             Onglets, résultat, fiche, affiche en grand
+├── js/                        Chargés dans cet ordre par index.html
+│   ├── config.js              Constantes et état de la page
+│   ├── dom.js                 Références vers les éléments de la page
+│   ├── utils.js               Texte, nombres, dates, stockage
+│   ├── catalog.js             Catalogue des animes
+│   ├── api.js                 AniList, Jikan, traduction
+│   ├── selection.js           Choix de l'anime, de la version, de la saison
+│   ├── search.js              Recherche et suggestions
+│   ├── time-budget.js         Durée ou heure de fin
+│   ├── calculator.js          Calcul de la session
+│   ├── result-view.js         Affichage du résultat
+│   ├── details-view.js        Fiche de l'anime et synopsis
+│   ├── tabs.js                Onglets Calcul / Détails
+│   ├── settings.js            Menu paramètres et thème
+│   ├── persistence.js         Sauvegarde du formulaire
+│   └── main.js                Démarrage de la page
+├── docker/
+│   ├── Dockerfile             Image nginx
+│   └── nginx.conf             Configuration du serveur
+├── docker-compose.yml         Lancement Docker (port 8080)
+├── scripts/
+│   └── serve.js               Serveur Node de test (port 5173)
+├── docs/
+│   └── REPRISE.md             Notes pour reprendre le projet
+├── .claude/
+│   ├── launch.json            Aperçu dans l'app Claude
+│   └── skills/                Skills du projet (maj-docs, relecture-code)
+├── CLAUDE.md                  Spécifications et conventions de code
+├── README.md                  Ce fichier
+└── LICENSE                    Licence MIT
+```
 
 ## Ajouter un anime au catalogue
 
-Ajoute une entrée dans `CATALOG` (`data.js`) :
+Ajoute une entrée dans `CATALOG` (`js/catalog.js`) :
 
 ```js
 {
   id: "mon-anime",
   title: "Mon Anime",
   versions: [{
-    id: "tv", label: "Série TV", ...STD,
+    id: "tv", label: "Série TV", ...STANDARD_TIMING,
     seasons: [
-      { name: "Saison 1", first: 1, eps: 12 },
-      { name: "Saison 2", first: 13, eps: 12 }
+      { name: "Saison 1", firstEpisode: 1, episodes: 12 },
+      { name: "Saison 2", firstEpisode: 13, episodes: 12 }
     ]
   }]
 }
 ```
 
 Le format complet (versions, fillers, durées par saison) est décrit dans `CLAUDE.md`.
+
+## Développé avec Claude
+
+<img src="assets/gia.svg" alt="GIA" width="132" align="right">
+
+Ce projet a été construit avec **Claude** (Anthropic), via Claude Code, dans le cadre d'un test du développement assisté par IA :
+
+- Claude a écrit le code, le catalogue, les textes du site et la documentation, à partir des demandes de l'auteur.
+- Chaque étape a été testée dans le navigateur puis committée avec la mention `Co-Authored-By: Claude`.
+- Les textes suivent les règles [stop-slop](https://github.com/hardikpandya/stop-slop) pour éviter les tournures typiques des IA.
+- Deux skills du projet (`.claude/skills/`) encadrent le travail : `maj-docs` met à jour la doc avant chaque commit, `relecture-code` relit le code pour le garder clair.
+
+### Reprendre le projet avec Claude
+
+Avant toute nouvelle demande dans une nouvelle session, demande à Claude de lire, dans cet ordre :
+
+1. `docs/REPRISE.md` : où en est le projet, comment le lancer et le tester, points d'attention, tes préférences.
+2. `CLAUDE.md` : spécifications complètes, arborescence et conventions de code.
+
+Par exemple : « Lis d'abord docs/REPRISE.md puis CLAUDE.md, ensuite on continue. »
 
 ## Sources des données
 
@@ -98,3 +153,7 @@ Le format complet (versions, fillers, durées par saison) est décrit dans `CLAU
 ## Technique
 
 HTML, CSS et JavaScript, sans framework ni étape de build.
+
+## Licence
+
+[MIT](LICENSE) © 2026 Henzo RENET

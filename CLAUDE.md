@@ -19,7 +19,9 @@ Interface et textes en français.
 ```
 anime-clock/
 ├── index.html            Page unique : en-tête, formulaire, onglets Calcul / Détails, modal de l'affiche
-├── assets/logo.svg       Logo (horloge + traits de vitesse manga + éclat), sert aussi de favicon
+├── assets/
+│   ├── logo.svg          Logo (horloge + traits de vitesse manga + éclat), sert aussi de favicon
+│   └── gia.svg           Pictogramme GIA (généré par IA · Claude), utilisé dans le README
 ├── css/
 │   ├── base.css          Couleurs et thèmes, bases, en-tête, menu paramètres, mise en page, pied de page
 │   ├── form.css          Formulaire : étapes, champs, recherche, mode de temps, bouton Calculer
@@ -48,8 +50,9 @@ anime-clock/
 ├── docs/REPRISE.md       Notes de reprise pour une nouvelle session
 ├── .claude/              launch.json (aperçu) et skills du projet
 ├── CLAUDE.md             Ce fichier
-├── README.md             Présentation, lancement, arborescence, mentions IA
-└── LICENSE               MIT
+├── README.md             Présentation, lancement, arbre ASCII, usage de Claude, pictogramme GIA, avertissement
+├── LICENSE               MIT, © 2026 Henzo RENET
+└── .gitattributes        Fins de ligne LF partout
 ```
 
 - Un nouveau script JS se déclare dans `index.html` à sa place dans l'ordre de chargement.
@@ -172,6 +175,15 @@ Appliquer les règles **stop-slop** (https://github.com/hardikpandya/stop-slop),
 - Couleur d'accent orange (`--color-accent`), intro en jaune (`--color-opening`), outro en violet (`--color-ending`).
 - Mobile : marge latérale de 16 px, aucun défilement horizontal, champs d'au moins 44 px de haut.
 - `[hidden]` force `display: none` (sinon les `.checkbox` / `.field` en flex restent visibles).
+
+## README
+
+Le README doit toujours contenir :
+- l'arborescence en arbre ASCII, à jour ;
+- la mention de l'usage de Claude (Anthropic) avec le pictogramme `assets/gia.svg` ;
+- l'avertissement : l'IA est utilisée à titre de test et d'expérimentation, sur ce projet seulement ;
+- la marche à suivre pour reprendre le projet avec Claude : lire `docs/REPRISE.md` puis `CLAUDE.md` ;
+- la licence MIT.
 
 ## Git et skills du projet
 

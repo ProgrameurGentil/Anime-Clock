@@ -17,6 +17,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 9. Docker (nginx) et `README.md`. Image testée : une adresse inconnue répond 404 au lieu de renvoyer la page d'accueil.
 10. Première relecture qualité (skill `relecture-code`) : un seul point d'appel AniList, titres en double retirés de la fiche.
 11. Arborescence rangée (`assets/`, `css/`, `js/`, `docker/`, `docs/`) et réécriture complète du code avec des noms explicites : `app.js` découpé en 14 fichiers par rôle, ids HTML, classes CSS, variables CSS et clés du catalogue renommés (`eps` → `episodes`, `op` → `opening`…). Comportement inchangé : cas de référence, recherche, fiche, thème, restauration et Docker vérifiés.
+12. README complet (arbre ASCII, usage de Claude avec le pictogramme GIA `assets/gia.svg`, avertissement « test et expérimentation », reprise de session), licence MIT, `.gitattributes` (fins de ligne LF).
 
 `git log --oneline` donne l'historique détaillé.
 
