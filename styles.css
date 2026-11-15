@@ -117,7 +117,8 @@ body {
 
 .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; min-width: 0; }
 .field label { font-size: 14px; font-weight: 500; }
-.opt { color: var(--muted); font-weight: 400; font-size: 12px; }
+.req { color: var(--accent); font-weight: 700; }
+.reqnote { margin-top: 16px; }
 .row { display: flex; gap: 12px; flex-wrap: wrap; }
 .row > .field { flex: 1 1 140px; }
 .row > .grow { flex: 2 1 200px; }

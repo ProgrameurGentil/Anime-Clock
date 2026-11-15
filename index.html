@@ -23,19 +23,19 @@
         <h2><span class="num">1</span> L'anime</h2>
 
         <div class="field combo">
-          <label for="search">Titre</label>
-          <input id="search" type="search" placeholder="One Piece, Naruto, Frieren…" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
+          <label for="search">Titre <span class="req" aria-hidden="true">*</span></label>
+          <input id="search" type="search" aria-required="true" placeholder="One Piece, Naruto, Frieren…" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
           <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
           <p id="animeInfo" class="hint"></p>
         </div>
 
         <div class="row">
           <div class="field grow">
-            <label for="season">Saison / arc</label>
+            <label for="season">Saison / arc <span class="req" aria-hidden="true">*</span></label>
             <select id="season" disabled></select>
           </div>
           <div class="field">
-            <label for="episode">Épisode de départ <span class="opt">optionnel</span></label>
+            <label for="episode">Épisode de départ</label>
             <input id="episode" type="number" min="1" inputmode="numeric" placeholder="début" disabled>
           </div>
         </div>
@@ -77,11 +77,11 @@
         <div id="durationBox">
           <div class="row">
             <div class="field">
-              <label for="hours">Heures</label>
+              <label for="hours">Heures <span class="req" aria-hidden="true">*</span></label>
               <input id="hours" type="number" min="0" max="72" value="2" inputmode="numeric">
             </div>
             <div class="field">
-              <label for="minutes">Minutes</label>
+              <label for="minutes">Minutes <span class="req" aria-hidden="true">*</span></label>
               <input id="minutes" type="number" min="0" max="59" value="0" inputmode="numeric">
             </div>
           </div>
@@ -96,7 +96,7 @@
 
         <div id="untilBox" hidden>
           <div class="field">
-            <label for="until">Je dois arrêter à</label>
+            <label for="until">Je dois arrêter à <span class="req" aria-hidden="true">*</span></label>
             <input id="until" type="time" value="23:00">
           </div>
           <p id="untilHint" class="hint"></p>
@@ -156,6 +156,7 @@
         </details>
       </section>
 
+      <p class="hint reqnote"><span class="req">*</span> champ obligatoire</p>
       <button type="submit" class="go" id="go">Calculer</button>
       <p id="formError" class="error" role="alert"></p>
     </form>
