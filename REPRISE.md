@@ -14,6 +14,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 6. Cette doc (`CLAUDE.md` et `REPRISE.md`).
 7. Skills du projet `maj-docs` et `relecture-code` (`.claude/skills/`).
 8. Colonne de droite en onglets Calcul / Détails (sticky), synopsis traduit en français avec bascule vers l'original, affiche en grand dans un modal, menu paramètres avec choix du thème.
+9. Docker (nginx) et `README.md`.
 
 `git log --oneline` donne l'historique détaillé.
 
@@ -21,6 +22,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 
 - Le plus simple : ouvrir `index.html` dans un navigateur.
 - Serveur local : `node scripts/serve.js` puis http://localhost:5173. Dans l'app Claude, `.claude/launch.json` déclare la config `anime-clock` pour l'aperçu.
+- Docker : `docker compose up -d --build` puis http://localhost:8080. **Pas encore testé** : Docker Desktop était installé mais arrêté pendant le développement.
 - Pas de tests automatisés. On vérifie dans le navigateur, et les fonctions sont globales, donc testables depuis la console :
   - `pickAnime(CATALOG.find(a => a.id === "one-piece"))` sélectionne un anime.
   - `els.form.requestSubmit()` lance le calcul, puis `els.result.innerText` donne le résultat.
@@ -46,6 +48,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 - Bouton pour copier ou partager le résultat.
 - Autres réglages dans le menu paramètres (langue par défaut du synopsis, durée de générique par défaut…).
 - Hébergement gratuit (GitHub Pages ou Netlify) : aucun build, il suffit de publier le dossier.
+- Tester l'image Docker une fois Docker Desktop lancé.
 
 ## Préférences de l'utilisateur
 

@@ -1,0 +1,7 @@
+services:
+  anime-clock:
+    build: .
+    image: anime-clock
+    ports:
+      - "8080:80"
+    restart: unless-stopped

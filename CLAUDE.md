@@ -24,6 +24,8 @@ Interface et textes en français.
 | `data.js` | Catalogue `CATALOG` écrit à la main. |
 | `logo.svg` | Logo (horloge + traits de vitesse manga + éclat). Sert aussi de favicon. |
 | `scripts/serve.js` | Petit serveur Node pour tester en local (port 5173). Pas utilisé en production. |
+| `Dockerfile`, `docker/nginx.conf`, `docker-compose.yml`, `.dockerignore` | Image Docker facultative : nginx 1.27 alpine sert les 5 fichiers du site, port 8080 côté hôte. Tout nouveau fichier servi doit être ajouté à la ligne `COPY` du Dockerfile. |
+| `README.md` | Présentation, lancement (fichier, Node, Docker), ajout d'un anime. |
 
 ## Fonctionnalités
 
