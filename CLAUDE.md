@@ -187,7 +187,10 @@ Le README doit toujours contenir :
 
 ## Git et skills du projet
 
-- Committer au fur et à mesure : une fonctionnalité testée = un commit, message en français.
+- Dépôt distant : `origin` = https://github.com/ProgrameurGentil/Anime-Clock.git.
+- **Branches** : tout le travail passe par une branche dédiée (`feature/…`, `fix/…`, `docs/…`), créée depuis `main` au début de chaque tâche. Jamais de commit direct sur `main`.
+- **`main`** ne reçoit qu'une tâche entièrement terminée et testée, et seulement avec **l'accord explicite de l'utilisateur** pour chaque fusion. Sans cet accord, la branche reste à part (poussée sur `origin` si besoin).
+- Committer au fur et à mesure sur la branche : une fonctionnalité testée = un commit, message en français.
 - Avant chaque commit (au minimum les commits majeurs) : skill **`maj-docs`** (`.claude/skills/maj-docs/`), qui met à jour `CLAUDE.md` et `docs/REPRISE.md`.
 - Après une fonctionnalité ajoutée ou modifiée, avant de committer : skill **`relecture-code`** (`.claude/skills/relecture-code/`), relecture qualité et clarté du code.
 - `.claude/` est ignoré sauf `.claude/launch.json` et `.claude/skills/`.

@@ -19,6 +19,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 11. Arborescence rangée (`assets/`, `css/`, `js/`, `docker/`, `docs/`) et réécriture complète du code avec des noms explicites : `app.js` découpé en 14 fichiers par rôle, ids HTML, classes CSS, variables CSS et clés du catalogue renommés (`eps` → `episodes`, `op` → `opening`…). Comportement inchangé : cas de référence, recherche, fiche, thème, restauration et Docker vérifiés.
 12. README complet (arbre ASCII, usage de Claude avec le pictogramme GIA, avertissement « test et expérimentation », reprise de session), licence MIT, `.gitattributes` (fins de ligne LF).
 13. Pictogramme GIA fourni par l'utilisateur (`assets/gia.png`) à la place du dessin maison, affiché en petit dans le README.
+14. Dépôt poussé sur GitHub (`origin`, https://github.com/ProgrameurGentil/Anime-Clock). Règle des branches ajoutée dans `CLAUDE.md`.
 
 `git log --oneline` donne l'historique détaillé.
 
@@ -61,7 +62,8 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 
 - Réponses et site en français.
 - Poser des questions avant de démarrer quand un choix lui revient, sauf pour les bonus.
-- Committer au fur et à mesure des ajouts testés.
+- Committer au fur et à mesure des ajouts testés, sur une branche dédiée à la tâche.
+- `main` seulement pour une tâche terminée, et seulement avec son accord explicite à chaque fois.
 - Pas de PHP ni de Rust. Icônes Font Awesome gratuites uniquement.
 - Écriture selon les règles stop-slop.
 - Qualité de code : noms explicites partout, pas de variable d'une lettre, arborescence rangée par type de fichier.
