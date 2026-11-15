@@ -8,11 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="top">
-    <h1><span class="logo" aria-hidden="true">◷</span> Anime Clock</h1>
+    <h1><img class="logo" src="logo.svg" alt="" width="44" height="44"> Anime Clock</h1>
     <p class="tagline">Dis-moi combien de temps tu as, je te dis combien d'épisodes tu peux enchaîner.</p>
   </header>
 
@@ -20,10 +22,11 @@
     <form id="form" class="card" autocomplete="off" novalidate>
       <!-- 1. Anime -->
       <section class="step">
-        <h2><span class="num">1</span> L'anime</h2>
+        <h2><span class="num"><i class="fa-solid fa-tv"></i></span> L'anime</h2>
 
         <div class="field combo">
           <label for="search">Titre <span class="req" aria-hidden="true">*</span></label>
+          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
           <input id="search" type="search" aria-required="true" placeholder="One Piece, Naruto, Frieren…" role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list">
           <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
           <p id="animeInfo" class="hint"></p>
@@ -41,7 +44,7 @@
         </div>
 
         <details class="advanced" id="animeAdvanced">
-          <summary>Avancé</summary>
+          <summary><i class="fa-solid fa-sliders"></i> Avancé</summary>
           <div class="field" id="versionField">
             <label for="version">Version</label>
             <select id="version"></select>
@@ -68,10 +71,10 @@
 
       <!-- 2. Temps -->
       <section class="step">
-        <h2><span class="num">2</span> Ton temps</h2>
+        <h2><span class="num"><i class="fa-regular fa-clock"></i></span> Ton temps</h2>
         <div class="segmented" role="radiogroup" aria-label="Type de limite">
-          <label><input type="radio" name="mode" value="duration" checked> Une durée</label>
-          <label><input type="radio" name="mode" value="until"> Une heure de fin</label>
+          <label><input type="radio" name="mode" value="duration" checked> <i class="fa-solid fa-hourglass-half"></i> Une durée</label>
+          <label><input type="radio" name="mode" value="until"> <i class="fa-solid fa-flag-checkered"></i> Une heure de fin</label>
         </div>
 
         <div id="durationBox">
@@ -90,7 +93,7 @@
             <button type="button" data-min="60">1 h</button>
             <button type="button" data-min="120">2 h</button>
             <button type="button" data-min="180">3 h</button>
-            <button type="button" data-endofday>Jusqu'à minuit</button>
+            <button type="button" data-endofday><i class="fa-solid fa-moon"></i> Jusqu'à minuit</button>
           </div>
         </div>
 
@@ -105,12 +108,12 @@
 
       <!-- 3. Génériques -->
       <section class="step">
-        <h2><span class="num">3</span> Génériques</h2>
-        <label class="check"><input type="checkbox" id="skipOp" checked> Je saute les intros</label>
-        <label class="check"><input type="checkbox" id="skipEd" checked> Je saute les outros</label>
+        <h2><span class="num"><i class="fa-solid fa-music"></i></span> Génériques</h2>
+        <label class="check"><input type="checkbox" id="skipOp" checked> <i class="fa-solid fa-forward"></i> Je saute les intros</label>
+        <label class="check"><input type="checkbox" id="skipEd" checked> <i class="fa-solid fa-forward-step"></i> Je saute les outros</label>
 
         <details class="advanced">
-          <summary>Avancé</summary>
+          <summary><i class="fa-solid fa-sliders"></i> Avancé</summary>
           <div class="row">
             <div class="field">
               <label for="opKeep">Intros que je regarde quand même</label>
@@ -138,7 +141,7 @@
       <!-- 4. Bonus -->
       <section class="step">
         <details class="advanced">
-          <summary>Vitesse et pauses</summary>
+          <summary><i class="fa-solid fa-gauge-high"></i> Vitesse et pauses</summary>
           <div class="field">
             <label for="speed">Vitesse de lecture</label>
             <select id="speed">
@@ -157,11 +160,17 @@
       </section>
 
       <p class="hint reqnote"><span class="req">*</span> champ obligatoire</p>
-      <button type="submit" class="go" id="go">Calculer</button>
+      <button type="submit" class="go" id="go"><i class="fa-solid fa-calculator"></i> Calculer</button>
       <p id="formError" class="error" role="alert"></p>
     </form>
 
-    <section id="result" class="card result" aria-live="polite" hidden></section>
+    <div class="side">
+      <details id="details" class="card details" hidden>
+        <summary><i class="fa-solid fa-circle-info"></i> Détails de l'anime</summary>
+        <div id="detailsBody" class="details-body"></div>
+      </details>
+      <section id="result" class="card result" aria-live="polite" hidden></section>
+    </div>
   </main>
 
   <footer class="foot">

@@ -551,10 +551,10 @@ function render(r) {
   }
 
   const stats = [];
-  if (n) stats.push([fmtClock(end), "fin si tu lances maintenant"]);
-  stats.push([fmtDur(leftover), "de marge"]);
-  if (next && n) stats.push([fmtDur(next.c.total + nextPause - leftover), "manquent pour un épisode de plus"]);
-  if (saved >= 30) stats.push([fmtDur(saved), "gagnées sur les génériques"]);
+  if (n) stats.push([fmtClock(end), "fin si tu lances maintenant", "fa-flag-checkered"]);
+  stats.push([fmtDur(leftover), "de marge", "fa-hourglass-end"]);
+  if (next && n) stats.push([fmtDur(next.c.total + nextPause - leftover), "manquent pour un épisode de plus", "fa-plus"]);
+  if (saved >= 30) stats.push([fmtDur(saved), "gagnées sur les génériques", "fa-forward"]);
 
   // Frise
   let bar = "";
@@ -611,7 +611,7 @@ function render(r) {
     <h2>${escapeHtml(anime.title)}${anime.versions.length > 1 ? " · " + escapeHtml(v.label) : ""}</h2>
     <div class="big"><strong>${n}</strong><span>${plural(n, "épisode", "épisodes")}</span></div>
     <p class="sub">${escapeHtml(sub)}</p>
-    <div class="stats">${stats.map(([b, s]) => `<div class="stat"><b>${b}</b><small>${s}</small></div>`).join("")}</div>
+    <div class="stats">${stats.map(([b, s, ic]) => `<div class="stat"><b><i class="fa-solid ${ic}" aria-hidden="true"></i>${b}</b><small>${s}</small></div>`).join("")}</div>
     ${n ? `<div class="timeline" aria-hidden="true">${bar}</div>
     <div class="legend"><span><i style="background:var(--op)"></i>Intro</span><span><i style="background:var(--accent)"></i>Épisode</span><span><i style="background:var(--ed)"></i>Outro</span><span><i class="partial" style="border:1px solid var(--border)"></i>Marge</span></div>
     <ul class="eplist">${list}</ul>` : ""}

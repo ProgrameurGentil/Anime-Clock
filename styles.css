@@ -71,7 +71,8 @@ body {
   font-size: clamp(28px, 5vw, 40px);
   letter-spacing: -.02em;
 }
-.logo { color: var(--accent); }
+.top h1 { display: flex; align-items: center; gap: 12px; }
+.logo { width: clamp(36px, 6vw, 48px); height: auto; flex: none; }
 .tagline { margin: 6px 0 0; color: var(--muted); }
 
 .layout {
@@ -85,8 +86,62 @@ body {
 }
 @media (min-width: 900px) {
   .layout { grid-template-columns: minmax(0, 440px) minmax(0, 1fr); }
-  .result { position: sticky; top: 20px; }
+  .side { position: sticky; top: 20px; }
 }
+.side { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+/* Détails de l'anime */
+.details { padding: 0; }
+.details > summary {
+  cursor: pointer;
+  padding: 16px 20px;
+  font-weight: 500;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.details > summary::-webkit-details-marker { display: none; }
+.details > summary::after {
+  content: "\f078";
+  font: var(--fa-font-solid);
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform .2s;
+}
+.details[open] > summary::after { transform: rotate(180deg); }
+.details > summary i { color: var(--accent); }
+.details-body { padding: 0 20px 20px; }
+.details-head { display: flex; gap: 16px; align-items: flex-start; }
+.details-head img {
+  width: 96px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  flex: none;
+  background: var(--surface-2);
+}
+.details-head h3 { margin: 0 0 4px; font-size: 18px; }
+.details-head .orig { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tags li { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+}
+.facts div { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; }
+.facts dt { font-size: 12px; color: var(--muted); }
+.facts dd { margin: 0; font-weight: 500; }
+.facts i { color: var(--accent); margin-right: 4px; }
+.synopsis { font-size: 14px; color: var(--text); margin: 0 0 12px; white-space: pre-line; }
+.seasons { width: 100%; border-collapse: collapse; font-size: 14px; }
+.seasons th, .seasons td { text-align: left; padding: 6px 4px; border-bottom: 1px dashed var(--border); }
+.seasons th { color: var(--muted); font-weight: 500; font-size: 12px; }
+.seasons td:not(:first-child), .seasons th:not(:first-child) { text-align: right; white-space: nowrap; }
+.details-body .src { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
+.details-body .src a { color: inherit; }
 
 .card {
   background: var(--surface);
@@ -163,6 +218,18 @@ input:disabled, select:disabled { opacity: .55; }
 
 /* Recherche */
 .combo { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 37px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.combo input[type="search"] { padding-left: 38px; }
+.go i, .chips i, .segmented i, .check i, .advanced summary i { margin-right: 4px; }
+.check i { color: var(--muted); width: 16px; text-align: center; }
+.note i { color: var(--accent); margin-right: 6px; }
+.stat b i { font-size: 14px; color: var(--accent); margin-right: 6px; }
 .suggestions {
   position: absolute;
   top: 74px; left: 0; right: 0;
