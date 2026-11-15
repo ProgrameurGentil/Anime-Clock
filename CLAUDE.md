@@ -113,7 +113,9 @@ Appliquer les règles **stop-slop** (https://github.com/hardikpandya/stop-slop),
 - Mobile : marge latérale de 16 px, aucun défilement horizontal, champs d'au moins 44 px de haut.
 - `[hidden]` force `display: none` (sinon les `.check` / `.field` en flex restent visibles).
 
-## Git
+## Git et skills du projet
 
 - Committer au fur et à mesure : une fonctionnalité testée = un commit, message en français.
-- `.claude/` est ignoré sauf `.claude/launch.json`.
+- Avant chaque commit (au minimum les commits majeurs) : skill **`maj-docs`** (`.claude/skills/maj-docs/`), qui met à jour `CLAUDE.md` et `REPRISE.md`.
+- Après une fonctionnalité ajoutée ou modifiée, avant de committer : skill **`relecture-code`** (`.claude/skills/relecture-code/`), relecture qualité et clarté du code.
+- `.claude/` est ignoré sauf `.claude/launch.json` et `.claude/skills/`.
