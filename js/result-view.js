@@ -17,6 +17,7 @@ function renderResult(plan) {
   dom.result.innerHTML = `
     <h2>${escapeHtml(title)}</h2>
     <div class="result-count"><strong>${watchedCount}</strong><span>${plural(watchedCount, "épisode", "épisodes")}</span></div>
+    ${renderResumeNote(watched, nextEpisode)}
     <p class="result-range">${escapeHtml(describeRange(watched, nextEpisode, missingForNext, spansSeveralSeasons))}</p>
     ${renderStats(plan, leftoverSeconds, missingForNext)}
     ${watchedCount ? `
@@ -26,12 +27,22 @@ function renderResult(plan) {
   `;
 }
 
+/** Mention de la reprise en cours d'épisode, vide si l'épisode de départ commence au début. */
+function renderResumeNote(watched, nextEpisode) {
+  const firstEpisode = watched.length ? watched[0].episode : nextEpisode && nextEpisode.episode;
+  if (!firstEpisode || !firstEpisode.alreadySeen) return "";
+  return `<p class="hint"><i class="fa-solid fa-play" aria-hidden="true"></i> `
+    + `Reprise à ${formatPlaybackPosition(firstEpisode.alreadySeen)} de l'épisode ${firstEpisode.number}</p>`;
+}
+
 /** Phrase sous le nombre : quels épisodes, ou ce qu'il manque pour en voir un. */
 function describeRange(watched, nextEpisode, missingForNext, spansSeveralSeasons) {
   if (watched.length === 0) {
-    return nextEpisode
-      ? `Il te manque ${formatDuration(missingForNext)} pour voir l'épisode ${nextEpisode.episode.number} en entier.`
-      : "Il n'y a plus d'épisode à partir de ce point.";
+    if (!nextEpisode) return "Il n'y a plus d'épisode à partir de ce point.";
+    const { number, alreadySeen } = nextEpisode.episode;
+    return alreadySeen
+      ? `Il te manque ${formatDuration(missingForNext)} pour finir l'épisode ${number}.`
+      : `Il te manque ${formatDuration(missingForNext)} pour voir l'épisode ${number} en entier.`;
   }
   const first = watched[0].episode;
   const last = watched[watched.length - 1].episode;
@@ -87,7 +98,8 @@ function renderTimeline(watched, nextEpisode, leftoverSeconds, available) {
 function renderEpisodeList(watched, now, spansSeveralSeasons) {
   const row = ({ episode, cost, startsAfter }) => {
     const seasonTag = spansSeveralSeasons ? `<span class="season-tag">${escapeHtml(episode.seasonName)}</span>` : "";
-    return `<li><span>Épisode ${episode.number}${seasonTag}</span>`
+    const resumeTag = episode.alreadySeen ? ` (reprise à ${formatPlaybackPosition(episode.alreadySeen)})` : "";
+    return `<li><span>Épisode ${episode.number}${resumeTag}${seasonTag}</span>`
       + `<time>${formatClock(addSeconds(now, startsAfter))} · ${formatDuration(cost.seconds)}</time></li>`;
   };
   if (watched.length <= EPISODE_LIST.max) return watched.map(row).join("");

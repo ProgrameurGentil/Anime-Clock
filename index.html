@@ -88,6 +88,17 @@
           </label>
           <div class="field-row">
             <div class="field">
+              <label for="resumeMinutes">Déjà regardé (min)</label>
+              <input id="resumeMinutes" type="number" min="0" inputmode="numeric" placeholder="0" disabled>
+            </div>
+            <div class="field">
+              <label for="resumeSeconds">Déjà regardé (s)</label>
+              <input id="resumeSeconds" type="number" min="0" max="59" inputmode="numeric" placeholder="0" disabled>
+            </div>
+          </div>
+          <p class="hint field-row-hint">Temps déjà vu dans l'épisode de départ. Le calcul compte seulement le reste.</p>
+          <div class="field-row">
+            <div class="field">
               <label for="episodeDuration">Durée d'un épisode (min)</label>
               <input id="episodeDuration" type="number" min="1" step="any" inputmode="decimal">
             </div>

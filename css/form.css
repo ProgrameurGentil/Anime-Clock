@@ -45,6 +45,7 @@ input[type="search"], input[type="number"], input[type="time"], select {
 input:disabled, select:disabled { opacity: .55; }
 
 .hint { margin: 2px 0 0; color: var(--color-muted); font-size: 13px; }
+.field-row-hint { margin: -6px 0 12px; } /* indication commune à une rangée de champs */
 .form-error { min-height: 1em; margin: 10px 0 0; color: var(--color-accent); font-size: 14px; }
 
 .checkbox {

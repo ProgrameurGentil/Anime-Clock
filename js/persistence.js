@@ -13,6 +13,8 @@ function saveForm() {
     versionIndex: Number(dom.version.value) || 0,
     seasonIndex: currentSeasonIndex(),
     startEpisode: dom.startEpisode.value,
+    resumeMinutes: dom.resumeMinutes.value,
+    resumeSeconds: dom.resumeSeconds.value,
     timeMode: timeMode()
   };
   for (const name of SAVED_TEXT_FIELDS) saved[name] = dom[name].value;

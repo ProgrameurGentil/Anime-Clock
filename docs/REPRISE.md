@@ -2,9 +2,9 @@
 
 Notes pour une nouvelle session qui reprend Anime Clock. À lire en premier, puis `CLAUDE.md` (spécifications complètes et conventions de code).
 
-## État au 15/11/2026
+## État au 17/11/2026
 
-Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px et mobile 375 px) et committé sur `main` :
+Tout ce qui a été demandé est fait et testé dans le navigateur (bureau 1280 px et mobile 375 px). Les étapes 1 à 14 sont sur `main`, les suivantes sur leur branche tant que l'utilisateur n'a pas validé la fusion :
 
 1. Premier jet : calcul, catalogue, recherche en ligne.
 2. Raccourci « Jusqu'à minuit » (fin de la journée en cours).
@@ -20,6 +20,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 12. README complet (arbre ASCII, usage de Claude avec le pictogramme GIA, avertissement « test et expérimentation », reprise de session), licence MIT, `.gitattributes` (fins de ligne LF).
 13. Pictogramme GIA fourni par l'utilisateur (`assets/gia.png`) à la place du dessin maison, affiché en petit dans le README.
 14. Dépôt poussé sur GitHub (`origin`, https://github.com/ProgrameurGentil/Anime-Clock). Règle des branches ajoutée dans `CLAUDE.md`.
+15. Branche `feature/reprise-episode` : champ « Déjà regardé » (min + s) dans Avancé, le calcul ne compte que le reste de l'épisode de départ. Avec 12:30 déjà vus sur le cas de référence : 9 épisodes (250 à 258), 9 min de marge.
 
 `git log --oneline` donne l'historique détaillé.
 
@@ -47,6 +48,7 @@ Tout ce qui a été demandé est fait, testé dans le navigateur (bureau 1280 px
 - Le serveur de test servait `.svg` en binaire au début, ce qui cassait le logo. C'est corrigé dans `scripts/serve.js`. Si une ressource ne s'affiche pas, vérifier les types MIME de ce script.
 - Le formulaire est sauvé sous `anime-clock:form:v2` depuis le renommage des champs ; l'ancienne clé `anime-clock:v1` est effacée au démarrage.
 - Captures d'écran du navigateur intégré impossibles quand la fenêtre de Claude est masquée : vérifier alors par `getComputedStyle` ou le texte de la page.
+- Reprise dans l'outro sautée : l'épisode de départ coûte 0 s et apparaît à « 0 s » dans la liste. C'est cohérent avec le calcul, l'affichage reste à revoir si besoin.
 - La fin de ligne : Git convertit LF en CRLF sur cette machine Windows (avertissements sans gravité).
 
 ## Idées pour la suite (non demandées)

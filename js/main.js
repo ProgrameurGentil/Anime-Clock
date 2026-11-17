@@ -31,7 +31,8 @@ function initForm() {
   dom.skipEndings.addEventListener("change", syncCreditFields);
 
   const watchedFields = [
-    dom.startEpisode, dom.skipFillers, dom.stayInSeason, dom.episodeDuration, dom.episodeCount,
+    dom.startEpisode, dom.resumeMinutes, dom.resumeSeconds, dom.skipFillers, dom.stayInSeason,
+    dom.episodeDuration, dom.episodeCount,
     dom.hours, dom.minutes, dom.endTime, dom.skipOpenings, dom.skipEndings, dom.openingsKept,
     dom.endingsKept, dom.openingDuration, dom.endingDuration, dom.playbackSpeed, dom.pauseMinutes
   ];

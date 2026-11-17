@@ -83,6 +83,7 @@ anime-clock/
   - Version (normale / Kai, HxH 1999 / 2011, FMA 2003 / Brotherhood…), masquée s'il n'y a qu'une version.
   - Sauter les fillers (visible seulement si la version a une liste de fillers).
   - Ne pas dépasser la fin de la saison.
+  - Déjà regardé de l'épisode de départ (min + s, vides = 0) : le calcul ne compte que le reste de cet épisode. Doit rester sous sa durée. Vidé à chaque changement d'anime, de version ou de saison. Le résultat affiche « Reprise à mm:ss de l'épisode N ».
   - Durée d'un épisode (min), nombre d'épisodes (seulement pour les animes hors catalogue).
 
 ### 2. Le temps
@@ -162,6 +163,7 @@ Toujours dans un `try/catch`, le site marche sans.
   L'intro est regardée si la case est décochée ou si `i < intros gardées`. Pareil pour l'outro.
 - On enchaîne les épisodes tant que le total tient dans le temps disponible. On passe à la saison suivante sauf si « ne pas dépasser la saison » est coché. Les fillers sont retirés de la file si la case est cochée.
 - Une durée modifiée à la main dans Avancé remplace celle de toutes les saisons (`dataset.touched`). Changer de saison remet les valeurs par défaut.
+- Reprise en cours d'épisode : `upcomingEpisodes` met `alreadySeen` (secondes) sur l'épisode de départ, 0 sur les autres. `episodeCost` retire ce temps dans l'ordre intro, contenu, outro (`remainingSegments`). Le temps déjà vu ne compte pas comme temps gagné ; seuls les génériques restants et sautés comptent. L'index dans la session ne change pas, donc les « intros gardées » partent toujours de cet épisode. Un épisode de départ filler repris (décalage > 0) reste dans la file même si les fillers sont sautés.
 
 ## Style d'écriture (textes du site et docs)
 

@@ -73,8 +73,13 @@ function selectAnime(anime, saved = {}) {
 
   fillSeasonOptions(saved.seasonIndex ?? 0);
   if (saved.startEpisode) dom.startEpisode.value = saved.startEpisode;
+  // Une ancienne sauvegarde n'a pas ces champs : ils restent vides.
+  if (saved.resumeMinutes) dom.resumeMinutes.value = saved.resumeMinutes;
+  if (saved.resumeSeconds) dom.resumeSeconds.value = saved.resumeSeconds;
   dom.season.disabled = false;
   dom.startEpisode.disabled = false;
+  dom.resumeMinutes.disabled = false;
+  dom.resumeSeconds.disabled = false;
 
   // Réglages à vérifier : on ouvre « Avancé » pour que l'utilisateur les voie.
   if (anime.versions.length > 1 || anime.isManual || anime.hasUnknownEpisodeCount) dom.animeAdvanced.open = true;
@@ -112,6 +117,8 @@ function applySeasonDefaults() {
   dom.startEpisode.max = lastEpisodeOf(season);
   dom.startEpisode.placeholder = String(season.firstEpisode);
   dom.startEpisode.value = "";
+  dom.resumeMinutes.value = "";
+  dom.resumeSeconds.value = "";
 }
 
 /** Ligne de résumé sous le titre : saisons, épisodes, durée, fillers, versions. */

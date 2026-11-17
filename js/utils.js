@@ -29,6 +29,15 @@ function formatDuration(seconds) {
   return minutes ? `${hours} h ${String(minutes).padStart(2, "0")}` : `${hours} h`;
 }
 
+/** Position dans une vidéo, comme un lecteur : 750 → « 12:30 », 3930 → « 1:05:30 ». */
+function formatPlaybackPosition(seconds) {
+  const totalSeconds = Math.max(0, Math.round(seconds));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const secondsPart = String(totalSeconds % 60).padStart(2, "0");
+  return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${secondsPart}` : `${minutes}:${secondsPart}`;
+}
+
 /** Heure au format « 21:05 ». */
 function formatClock(date) {
   return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });

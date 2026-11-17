@@ -12,6 +12,8 @@ const dom = {
   animeInfo: byId("animeInfo"),
   season: byId("season"),
   startEpisode: byId("startEpisode"),
+  resumeMinutes: byId("resumeMinutes"),
+  resumeSeconds: byId("resumeSeconds"),
   animeAdvanced: byId("animeAdvanced"),
   versionField: byId("versionField"),
   version: byId("version"),
